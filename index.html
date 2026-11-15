@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Y'SMARA — The Hollow Hymn</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#05080a" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="description" content="Y'SMARA — The Hollow Hymn. An original offline 3D action-adventure for mobile. Sing. Listen. Choose what the world becomes." />
+<link rel="manifest" href="./manifest.webmanifest" />
+</head>
+<body>
+<div id="app">
+  <canvas id="glcanvas"></canvas>
+
+  <!-- ============================================================ BOOT -->
+  <div id="boot">
+    <h1 class="boot-title">Y'SMARA</h1>
+    <p class="boot-sub">The Hollow Hymn</p>
+    <div class="boot-bar"><i id="boot-bar-fill"></i></div>
+    <div class="boot-status" id="boot-status">Waking the coast…</div>
+    <div class="boot-skip" id="boot-skip" style="display:none">Tap to continue</div>
+  </div>
+
+  <!-- ============================================================ HUD -->
+  <div id="hud" class="hidden">
+    <div class="hud-tl">
+      <div class="hud-vitals">
+        <div class="bar hp" id="hp-bar"><i style="width:100%"></i></div>
+        <div class="bar stamina" id="stamina-bar"><i style="width:100%"></i></div>
+      </div>
+      <div class="hud-chip" id="region-chip"><b>Ashbend</b></div>
+    </div>
+
+    <div class="hud-objective" id="objective">
+      <div class="obj-title" id="obj-title">Hear the Coast</div>
+      <div class="obj-hint" id="obj-hint">Ring the Bell of Ashbend, then speak with Mother Senn.</div>
+    </div>
+
+    <div class="compass" id="compass"><div class="needle"></div></div>
+
+    <div class="hud-tr">
+      <div class="hud-icon-btn" id="btn-map" title="Map">◎</div>
+      <div class="hud-icon-btn" id="btn-journal" title="Journal">❖</div>
+      <div class="hud-icon-btn" id="btn-pause" title="Pause">❚❚</div>
+    </div>
+
+    <div class="hud-bl">
+      <div class="hud-chip">ECHOES <b id="echo-count">0 / 24</b></div>
+      <div class="hud-chip">BELLS <b id="bell-count">0 / 3</b></div>
+    </div>
+
+    <div class="interact-prompt" id="interact-prompt"><span class="key">E</span><span id="interact-text">Interact</span></div>
+    <div class="combo" id="combo"></div>
+    <div class="toasts" id="toasts"></div>
+    <div class="hint-strip" id="hint-strip"></div>
+    <div class="vignette-damage" id="vignette-damage"></div>
+    <div class="fps-counter" id="fps">60 FPS</div>
+  </div>
+
+  <!-- ============================================================ TOUCH -->
+  <div class="touch-layer" id="touch-layer">
+    <div class="stick-visual" id="stick"><div class="knob" id="stick-knob"></div></div>
+    <div class="action-btns" id="action-btns">
+      <div class="btn-cluster">
+        <div class="btn-col">
+          <div class="abtn small" data-btn="jump">▲<span class="lbl">JUMP</span></div>
+          <div class="abtn small" data-btn="interact">✦<span class="lbl">USE</span></div>
+        </div>
+        <div class="btn-col">
+          <div class="abtn primary" data-btn="sing">◎<span class="lbl">SING</span></div>
+          <div class="abtn small" data-btn="dodge">»<span class="lbl">DODGE</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ MENUS -->
+  <div class="screen" id="screen-title">
+    <div class="menu-bg"></div>
+    <div class="title-wrap">
+      <h1 class="game-logo"><span class="l1">Y'SMARA</span><span class="l2">The Hollow Hymn</span></h1>
+      <p class="game-tagline">The coast has been singing itself to sleep for eleven years. Tonight it stopped. You are the last Listener.</p>
+      <div class="menu-list" id="title-menu">
+        <button class="menu-btn" data-act="continue" id="btn-continue"><span class="idx">01</span><span class="label">Continue</span><span class="meta" id="continue-meta">—</span></button>
+        <button class="menu-btn" data-act="new"><span class="idx">02</span><span class="label">New Journey</span></button>
+        <button class="menu-btn" data-act="load"><span class="idx">03</span><span class="label">Load</span></button>
+        <button class="menu-btn" data-act="codex"><span class="idx">04</span><span class="label">Codex</span></button>
+        <button class="menu-btn" data-act="settings"><span class="idx">05</span><span class="label">Settings</span></button>
+        <button class="menu-btn" data-act="credits"><span class="idx">06</span><span class="label">Credits</span></button>
+      </div>
+    </div>
+    <div class="title-footer">
+      <span>Offline · No account · v1.0</span>
+      <span class="save-note" id="ach-note">0 / 18 memories found</span>
+    </div>
+  </div>
+
+  <!-- ============================================================ SAVE SLOTS -->
+  <div class="screen" id="screen-slots">
+    <div class="menu-bg"></div>
+    <div class="panel">
+      <div class="panel-head">
+        <h2 class="panel-title" id="slots-title">Choose a Journey<small>Three threads. One coast.</small></h2>
+        <button class="close-x" data-close>✕</button>
+      </div>
+      <div class="panel-body"><div class="slots" id="slot-list"></div></div>
+    </div>
+  </div>
+
+  <!-- ============================================================ SETTINGS -->
+  <div class="screen" id="screen-settings">
+    <div class="menu-bg"></div>
+    <div class="panel">
+      <div class="panel-head">
+        <h2 class="panel-title">Settings<small>Everything is stored on this device</small></h2>
+        <button class="close-x" data-close>✕</button>
+      </div>
+      <div class="panel-body" id="settings-body">
+        <div class="set-group">
+          <h4>Graphics</h4>
+          <div class="set-row">
+            <label>Quality Preset<span class="hint">Lower = cooler phone, longer battery</span></label>
+            <div class="seg" data-setting="quality">
+              <button data-val="auto">Auto</button><button data-val="ultra">Ultra</button><button data-val="high">High</button><button data-val="medium">Med</button><button data-val="low">Low</button><button data-val="potato">Battery</button>
+            </div>
+          </div>
+          <div class="set-row"><label>Dynamic Shadows<span class="hint">Sun shadows on terrain and structures</span></label><div class="toggle" data-toggle="shadows"></div></div>
+          <div class="set-row"><label>Cinematic Grading<span class="hint">Film grade, grain, vignette</span></label><div class="toggle" data-toggle="postFX"></div></div>
+          <div class="set-row"><label>Field of View<span class="hint" id="fov-val">66°</span></label><input class="slider" type="range" min="55" max="82" data-range="fov" /></div>
+          <div class="set-row"><label>Show FPS</label><div class="toggle" data-toggle="showFps"></div></div>
+        </div>
+        <div class="set-group">
+          <h4>Audio</h4>
+          <div class="set-row"><label>Master</label><input class="slider" type="range" min="0" max="100" data-range="volMaster" /></div>
+          <div class="set-row"><label>Music</label><input class="slider" type="range" min="0" max="100" data-range="volMusic" /></div>
+          <div class="set-row"><label>Effects</label><input class="slider" type="range" min="0" max="100" data-range="volSfx" /></div>
+          <div class="set-row"><label>Ambience</label><input class="slider" type="range" min="0" max="100" data-range="volAmbience" /></div>
+        </div>
+        <div class="set-group">
+          <h4>Controls</h4>
+          <div class="set-row"><label>Left-handed Layout<span class="hint">Moves the joystick to the right</span></label><div class="toggle" data-toggle="leftHanded"></div></div>
+          <div class="set-row"><label>Look Sensitivity</label><input class="slider" type="range" min="40" max="220" data-range="sensitivity" /></div>
+          <div class="set-row"><label>Auto-Sprint<span class="hint">Run without holding sprint</span></label><div class="toggle" data-toggle="autoSprint"></div></div>
+          <div class="set-row"><label>Haptics<span class="hint">Vibrate on hits</span></label><div class="toggle" data-toggle="vibration"></div></div>
+        </div>
+        <div class="set-group">
+          <h4>Data</h4>
+          <div class="set-row"><label>Storage Used<span class="hint" id="storage-info">—</span></label><button class="btn ghost" id="btn-wipe">Erase All Data</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ CODEX -->
+  <div class="screen" id="screen-codex">
+    <div class="menu-bg"></div>
+    <div class="panel">
+      <div class="panel-head">
+        <h2 class="panel-title">Codex<small>What the coast remembers</small></h2>
+        <button class="close-x" data-close>✕</button>
+      </div>
+      <div class="panel-body" id="codex-body"></div>
+    </div>
+  </div>
+
+  <!-- ============================================================ CREDITS -->
+  <div class="screen" id="screen-credits">
+    <div class="menu-bg"></div>
+    <div class="panel">
+      <div class="panel-head">
+        <h2 class="panel-title">Credits<small>Made entirely offline, for you</small></h2>
+        <button class="close-x" data-close>✕</button>
+      </div>
+      <div class="panel-body"><div class="credits-scroll" id="credits-body"></div></div>
+    </div>
+  </div>
+
+  <!-- ============================================================ PAUSE -->
+  <div class="screen" id="screen-pause">
+    <div class="menu-bg"></div>
+    <div class="panel">
+      <div class="panel-head">
+        <h2 class="panel-title">Paused<small id="pause-region">The Silt Shallows</small></h2>
+        <button class="close-x" data-close>✕</button>
+      </div>
+      <div class="panel-body">
+        <div class="pause-grid">
+          <button class="pause-btn" data-pause="resume"><span class="ico">▶</span>Resume</button>
+          <button class="pause-btn" data-pause="journal"><span class="ico">❖</span>Journal</button>
+          <button class="pause-btn" data-pause="map"><span class="ico">◎</span>Map</button>
+          <button class="pause-btn" data-pause="settings"><span class="ico">⚙</span>Settings</button>
+          <button class="pause-btn" data-pause="save"><span class="ico">◈</span>Save</button>
+          <button class="pause-btn" data-pause="title"><span class="ico">⌂</span>Main Menu</button>
+        </div>
+        <p style="font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;color:rgba(235,227,210,.32);text-transform:uppercase;margin-top:22px;text-align:center">
+          Progress autosaves at every shrine and bell
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ JOURNAL -->
+  <div class="screen" id="screen-journal">
+    <div class="menu-bg"></div>
+    <div class="panel">
+      <div class="panel-head">
+        <h2 class="panel-title">Journal<small id="journal-sub">The Listener's record</small></h2>
+        <button class="close-x" data-close>✕</button>
+      </div>
+      <div class="panel-body" id="journal-body"></div>
+    </div>
+  </div>
+
+  <!-- ============================================================ MAP -->
+  <div class="screen" id="screen-map">
+    <div class="menu-bg"></div>
+    <div class="panel">
+      <div class="panel-head">
+        <h2 class="panel-title">The Coast<small>Seven bells, five reaches, one hollow</small></h2>
+        <button class="close-x" data-close>✕</button>
+      </div>
+      <div class="panel-body">
+        <div class="map-wrap"><canvas class="map-canvas" id="map-canvas" width="720" height="720"></canvas></div>
+        <div class="row-btns" style="justify-content:center;margin-top:12px">
+          <span class="hud-chip"><b>◉</b> You</span>
+          <span class="hud-chip"><b style="color:#9fe8d8">▲</b> Bell</span>
+          <span class="hud-chip"><b style="color:#7fe3d4">❖</b> Echo</span>
+          <span class="hud-chip"><b style="color:#ffcb84">◇</b> Shrine</span>
+          <span class="hud-chip"><b style="color:#8f7bd8">✦</b> Hollow</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ READER -->
+  <div class="reader" id="reader">
+    <div class="reader-card">
+      <div class="reader-kicker" id="reader-kicker">Memory Echo</div>
+      <h2 class="reader-title" id="reader-title"></h2>
+      <div class="reader-body" id="reader-body"></div>
+      <div class="reader-foot"><span id="reader-foot-left">Echo 1 of 24</span><span>Tap to close</span></div>
+    </div>
+  </div>
+
+  <!-- ============================================================ DIALOGUE -->
+  <div class="dialogue" id="dialogue">
+    <div class="dialogue-box">
+      <div class="dialogue-speaker" id="dlg-speaker">Mother Senn</div>
+      <div class="dialogue-text" id="dlg-text"></div>
+      <div class="dialogue-choices" id="dlg-choices"></div>
+      <div class="dialogue-next" id="dlg-next">Continue ▸</div>
+    </div>
+  </div>
+
+  <!-- ============================================================ CINEMATIC -->
+  <div class="letterbox top" id="lb-top"></div>
+  <div class="letterbox bottom" id="lb-bottom"></div>
+  <div class="cinematic-text" id="cin-text"></div>
+
+  <!-- ============================================================ ENDING -->
+  <div class="ending-screen" id="ending-screen">
+    <h1 class="ending-title" id="ending-title">LET IT REST</h1>
+    <div class="ending-sub" id="ending-sub">You finished the Ninth Verse.</div>
+    <div class="ending-lines" id="ending-lines"></div>
+    <div class="ending-note" id="ending-note"></div>
+    <div class="ending-stats" id="ending-stats"></div>
+    <div class="row-btns" style="justify-content:center">
+      <button class="btn" id="ending-continue">Return to the Coast</button>
+      <button class="btn ghost" id="ending-title-btn">Main Menu</button>
+    </div>
+  </div>
+
+  <!-- ============================================================ FATAL -->
+  <div id="fatal" style="display:none;position:fixed;inset:0;z-index:999;background:#05080a;color:#ebe3d2;padding:30px;font-family:system-ui;overflow:auto">
+    <h2 style="font-family:Georgia,serif;letter-spacing:.1em">Y'SMARA could not start</h2>
+    <p style="color:#c8bda6;line-height:1.7;max-width:60ch">This device or browser does not support WebGL2, which the game requires. Try Chrome on Android, or enable hardware acceleration.</p>
+    <pre id="fatal-detail" style="color:#b04a3c;font-size:11px;white-space:pre-wrap"></pre>
+  </div>
+</div>
+<script type="module" src="/src/main.js"></script>
+</body>
+</html>
