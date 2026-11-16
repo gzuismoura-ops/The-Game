@@ -127,7 +127,13 @@ com `npm install` e `npm run build`. Sem isso, o repositório teria centenas de 
 
 ---
 
-## Parte 3 — Gerar o APK pelo GitHub (sem Android Studio)
+## Parte 3 — Baixar o APK (já está pronto) ou gerar o seu
+
+> **Atalho:** o APK já foi construído e está publicado em
+> **[Releases](https://github.com/gzuismoura-ops/The-Game/releases/latest)**.
+> Baixe `yshmara-hollow-hymn.apk`, mande pro celular e instale. Pule para a Parte 3.3.
+>
+> Se você mudou o jogo e quer um APK novo, siga a Parte 3.1 em diante.
 
 O projeto já inclui o workflow `.github/workflows/build-apk.yml`. Ele roda na nuvem do GitHub,
 que tem o Android SDK pronto.
