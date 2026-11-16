@@ -54,8 +54,13 @@ npm run preview
 
 ### Instalar como APK
 
-Veja **[GUIA-GITHUB.md](GUIA-GITHUB.md)** — o passo a passo completo, do zero, para gerar o APK
-no GitHub Actions (sem precisar instalar Android Studio).
+**O APK já está pronto:** [baixar yshmara-hollow-hymn.apk (5,1 MB)](https://github.com/gzuismoura-ops/The-Game/releases/download/v1.0.0/yshmara-hollow-hymn.apk)
+
+No celular, abra o link, toque no arquivo baixado e permita "instalar de fonte desconhecida"
+quando o Android perguntar. Abra **Y'SMARA** na gaveta de apps.
+
+Para **gerar o seu próprio** APK do zero (sem instalar Android Studio), veja
+**[GUIA-GITHUB.md](GUIA-GITHUB.md)** — o passo a passo completo em GitHub Actions.
 
 ---
 
@@ -147,7 +152,7 @@ estrofe realmente pergunta. A resposta não é óbvia, e o jogo não te diz qual
 | **Áudio 100% sintetizado** | Web Audio API: sinos por modelagem modal, trilha adaptativa por escala, ambiência por bioma. Nenhum arquivo de áudio. |
 | **Presets de qualidade** | `low / medium / high / ultra`: pixel ratio, sombras, pós-processamento, densidade de vegetação, detalhe da água. Detectados pelo hardware e ajustáveis a qualquer momento. |
 | **Salvamento em `localStorage`** | Slots v3, checagem de corrupção, autosave em checkpoints, "apagar tudo" explícito. Nada sai do aparelho. |
-| **Capacitor** | O mesmo build web roda como app Android nativo, sem reescrever nada. |
+| **Capacitor 8** | O mesmo build web roda como app Android nativo, sem reescrever nada. APK publicado em Releases. |
 
 ### Estrutura
 
@@ -233,8 +238,11 @@ shader do jogo**. As imagens em `screenshots/` saem desse pipeline (~0,3 s por f
   (tentei construir, falhou; desisti e construí as alternativas acima). Os shaders são validados por
   gramática, não por compilação de driver. Espere diferenças visuais pequenas entre os screenshots e
   o jogo rodando de verdade (AA, tone mapping, sombras suaves, bloom).
-- **O APK não foi gerado neste ambiente** — não há Java, Gradle nem Android SDK aqui. O projeto
-  Android é gerado pelo workflow do GitHub Actions, e essa é a via testada e recomendada.
+- **O APK foi construído de verdade**, pelo GitHub Actions, e está publicado em
+  [Releases](https://github.com/gzuismoura-ops/The-Game/releases/latest) (5,1 MB).
+  Todos os passos do build passaram: build web → `cap add android` → Gradle `assembleDebug` → upload.
+  O que **não** foi feito foi **instalar e abrir** o APK num aparelho Android real (não há um aqui),
+  então a instalação e o primeiro boot foram verificados pelo build, não em hardware.
 - **Não foi medido em aparelho físico.** O alvo de performance (60 fps em médio, 30 fps em high)
   vem do orçamento de geometria e do preset adaptativo, não de medição em dispositivo.
 
