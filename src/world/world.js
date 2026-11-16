@@ -86,9 +86,12 @@ export function terrainHeight(x, z) {
   const dHollow = dist2d(x, z, 6, 268);
   const dTitan = dist2d(x, z, 0, -318);
 
-  // --- base drowned shelf: gentle dunes under shallow water
-  let h = -1.6 + fbm(n1, x * 0.0075, z * 0.0075, 4) * 2.1;
-  h += fbm(n3, x * 0.021, z * 0.021, 3) * 0.55;
+  // --- base drowned shelf: gentle dunes under shallow water.
+  // The base used to average -1.6 m, so most of the Shallows was open water and
+  // Kell read as a village floating in an empty sea. Raise the shelf so the region
+  // is a tidal flat: mostly exposed silt, with braided channels still underwater.
+  let h = -0.55 + fbm(n1, x * 0.0075, z * 0.0075, 4) * 2.6;
+  h += fbm(n3, x * 0.021, z * 0.021, 3) * 0.62;
 
   // --- tidal channels braided through the shallows
   const chA = Math.sin((x * 0.017) + fbm(n2, x * 0.004, z * 0.004, 3) * 3.2);
@@ -97,6 +100,7 @@ export function terrainHeight(x, z) {
   // --- salt-grass islands: low mounds that break the water surface
   const islandMask = smoothstep(0.12, 0.62, fbm(n2, x * 0.0125 + 31.7, z * 0.0125 - 12.3, 3));
   h += islandMask * 2.4 * smoothstep(90, 190, dShallows) * smoothstep(30, 80, dTitan) * smoothstep(60, 120, dHollow);
+
 
   // --- OSSUARY: coral ridge maze, canyon carved along a winding spine
   const ridgeMask = smoothstep(230, 96, dOssuary);
@@ -112,7 +116,11 @@ export function terrainHeight(x, z) {
 
   // --- GLASS REACH: a vast flat pan with faint wind-carved dunes
   const glassMask = smoothstep(190, 100, dGlass);
-  const glassFlat = 0.55 + fbm(n2, x * 0.006, z * 0.006, 3) * 0.32 + fbm(nDetail, x * 0.05, z * 0.05, 2) * 0.10;
+  // Broad, slow swells (a dry lake bed), plus a raised shoulder at the rim so the
+  // Reach has a horizon instead of dissolving into pale sky.
+  const glassFlat = 0.30 + fbm(n2, x * 0.006, z * 0.006, 3) * 0.55
+    + fbm(nDetail, x * 0.028, z * 0.028, 2) * 0.26
+    + smoothstep(150, 205, dGlass) * 3.4;
   h = lerp(h, glassFlat, glassMask * 0.93);
 
   // --- HOLLOW: a bowl that swallows its own edge; the maw descends at its heart
@@ -121,19 +129,24 @@ export function terrainHeight(x, z) {
   // ash field carved into cracked plates — fractured is the point
   const crack = Math.abs(fbm(n2, x * 0.05 + 3.3, z * 0.05 - 8.8, 3));
   const plating = smoothstep(0.12, 0.02, crack) * 1.5;
-  h = lerp(h, -0.6 + bowl * 1.8 + plating, hollowMask * 0.85);
-  h -= smoothstep(46, 8, dHollow) * 7.4;                    // the maw
+  // The floor sits ABOVE sea level: the Hollow is dry land that the sea gave up on.
+  h = lerp(h, 2.2 + bowl * 2.4 + plating, hollowMask * 0.85);
+  h -= smoothstep(58, 16, dHollow) * 2.1;                    // the maw: a shallow dish, not a flooded pit
   const rim = smoothstep(118, 150, dHollow) * smoothstep(186, 150, dHollow);
   h += rim * 8.5;                                            // raised lip around the Hollow
   h += smoothstep(150, 214, dHollow) * smoothstep(260, 214, dHollow) * 2.2;
 
-  // --- KNEELING ONE: a colossal stone shelf rising toward the titan
-  const titanMask = smoothstep(150, 60, dTitan);
-  const shelf = smoothstep(150, 48, dTitan) * 7.5;
-  h = lerp(h, h * 0.35 + shelf + 1.2, titanMask * 0.9);
-  // titan's own body is a separate mesh, but the ground humps under it
-  h += smoothstep(74, 24, dTitan) * 11;
-  h += smoothstep(30, 8, dTitan) * 20;
+  // --- KNEELING ONE: a colossal stone shelf rising toward the titan.
+  // The ascent has to be a WALKABLE SLOPE, not a cliff. Originally it climbed
+  // 76 m -> 17 m in 45 m of ground, which walled the titan off and left the player
+  // standing in a trench looking at rock. Now it rises gently over ~150 m and tops
+  // out at the titan's shoulder height so Ashbend's deck can sit on real ground.
+  const titanMask = smoothstep(230, 70, dTitan);
+  const shelf = smoothstep(230, 60, dTitan) * 21.0;
+  h = lerp(h, h * 0.30 + shelf + 1.4, titanMask * 0.62);
+  // the ground swells under the titan's mass, but never spikes into a wall
+  h += smoothstep(150, 40, dTitan) * 7.0;
+  h += smoothstep(86, 16, dTitan) * 6.0;
 
   // --- world rim: serrated sea-cliffs so the player never sees an edge
   const edge = innerEdge(x, z);
@@ -150,6 +163,18 @@ export function terrainHeight(x, z) {
 
   // --- fine surface detail
   h += fbm(nDetail, x * 0.09, z * 0.09, 3) * 0.16 * (1 - hollowMask * 0.5);
+
+  // --- KELL TIDAL FLAT, applied LAST so no later lerp can flood it.
+  // Kell's deck is at y=1.55 over water at y=0. Without this the village stood in
+  // open sea: the base shelf averaged -0.55 m and the tidal channels cut deeper.
+  // This raises a soft island under the stilts and feathers out over ~130 m.
+  const dKell = dist2d(x, z, -44, -52);
+  const kellMask = smoothstep(130, 18, dKell);
+  if (kellMask > 0.001) {
+    const marsh = 2.9 + fbm(nDetail, x * 0.016, z * 0.016, 2) * 0.7;
+    h = lerp(h, Math.max(h, marsh), kellMask);
+  }
+
   return h;
 }
 
@@ -271,19 +296,19 @@ export const BELLS = [
 
 // 24 memory echoes: each is a short playable vignette of text + ghost imagery
 export const ECHOES = [
-  { id: 'e01', x: -18, z: -270, y: 34, region: 'kneeling', title: 'O Nono Verso', lines: [
+  { id: 'e01', x: -18, z: -270, y: 26.9, region: 'kneeling', title: 'O Nono Verso', lines: [
     'Mãe Senn: "Oito versos. Oito Alcances. O Coro cantou até o mar obedecer."',
     'Mãe Senn: "O Nono ainda não tinha palavra. Então o Coro cantarolou. E o cantarolar abriu alguma coisa."',
   ]},
-  { id: 'e02', x: 26, z: -258, y: 34, region: 'kneeling', title: 'Primeira Queda', lines: [
+  { id: 'e02', x: 26, z: -258, y: 24.7, region: 'kneeling', title: 'Primeira Queda', lines: [
     '"O Ajoelhado foi o primeiro Cantor. Ele se ajoelhou para ouvir o Verso melhor."',
     '"Nunca mais se levantou. Construímos nossos telhados sobre a paciência dele."',
   ]},
-  { id: 'e03', x: -52, z: -238, y: 8, region: 'kneeling', title: 'Canção de Ninar Salgada', lines: [
+  { id: 'e03', x: -52, z: -238, y: 16.4, region: 'kneeling', title: 'Canção de Ninar Salgada', lines: [
     'Uma criança cantarola quatro notas. O vento responde com três.',
     '"Nunca termine uma canção que você não começou", diz a avó. "O Oco escuta os finais."',
   ]},
-  { id: 'e04', x: 4, z: -196, y: 2, region: 'shallows', title: 'A Passagem', lines: [
+  { id: 'e04', x: 4, z: -196, y: 10.6, region: 'shallows', title: 'A Passagem', lines: [
     'Peregrinos andaram por esta estrada quando ainda havia estrada embaixo dela.',
     'As pegadas encheram de sal e viraram as pedras onde você pisa agora.',
   ]},
@@ -299,7 +324,7 @@ export const ECHOES = [
     'Kell foi construída sobre palafitas para a maré passar por baixo e não levar nada além de corda.',
     'Levou a corda de todo jeito. Kell reconstruiu com corda que lembrava ter sido lustre.',
   ]},
-  { id: 'e08', x: 118, z: -70, y: 1, region: 'shallows', title: 'Um Sino Sem Torre', lines: [
+  { id: 'e08', x: 118, z: -70, y: 19.7, region: 'shallows', title: 'Um Sino Sem Torre', lines: [
     'Os sinos não foram feitos para chamar gente. Foram feitos para responder ao Coro.',
     'Todo sino é uma pergunta. O Coro parou de perguntar.',
   ]},
@@ -311,7 +336,7 @@ export const ECHOES = [
     'A grama para de crescer aqui. Não morre — para, no meio da frase.',
     'O Oco não mata. Ele interrompe.',
   ]},
-  { id: 'e11', x: 196, z: -120, y: 14, region: 'ossuary', title: 'O Cantor', lines: [
+  { id: 'e11', x: 196, z: -120, y: 6.4, region: 'ossuary', title: 'O Cantor', lines: [
     'O Ossuário não é osso. Osso teria apodrecido.',
     'É coral que cresceu no formato de um cantor enquanto escutava.',
   ]},
@@ -319,7 +344,7 @@ export const ECHOES = [
     'O Segundo Verso ainda está dentro destas costelas, dobrado como uma mão.',
     'Toque a parede e dá para sentir ele decidindo se continua.',
   ]},
-  { id: 'e13', x: 168, z: 6, y: 6, region: 'ossuary', title: 'Cria de Lume', lines: [
+  { id: 'e13', x: 168, z: 6, y: 21.1, region: 'ossuary', title: 'Cria de Lume', lines: [
     'Os esporos brilhantes são o último suspiro do Cantor, ainda à deriva.',
     'Iluminam o caminho de quem já desistiu das tochas.',
   ]},
@@ -339,11 +364,11 @@ export const ECHOES = [
     'Um pedaço de vidro mostra o seu reflexo cantando. Você não está cantando.',
     'Ele é educado. Está mostrando o que o Alcance lembra.',
   ]},
-  { id: 'e18', x: -252, z: 40, y: 4, region: 'glass', title: 'O Último Pôr do Sol', lines: [
+  { id: 'e18', x: -252, z: 40, y: 0.2, region: 'glass', title: 'O Último Pôr do Sol', lines: [
     'O Alcance guardou um pôr do sol completo, caso o céu algum dia precisasse lembrar.',
     'Está atrás de você, no maior vidro. Não vire rápido demais.',
   ]},
-  { id: 'e19', x: 10, z: 168, y: 4, region: 'hollow', title: 'Interrupção', lines: [
+  { id: 'e19', x: 10, z: 168, y: 0.6, region: 'hollow', title: 'Interrupção', lines: [
     'Eis uma frase: "O Coro cantou porque—"',
     'O Oco também não foi forte o bastante para terminá-la.',
   ]},
@@ -359,11 +384,11 @@ export const ECHOES = [
     'De perto o Oco não é silencioso. É o som de um fôlego suspenso.',
     'O que significa que, em algum lugar, alguém espera para respirar.',
   ]},
-  { id: 'e23', x: -96, z: -214, y: 30, region: 'kneeling', title: 'Ninho de Vela', lines: [
+  { id: 'e23', x: -96, z: -214, y: 6.0, region: 'kneeling', title: 'Ninho de Vela', lines: [
     'Uma pequena asa-de-brasa fez um ninho de badalos e corda fina como dente.',
     'Ela não é pássaro. Mas decidiu ser um, e o mundo permitiu.',
   ]},
-  { id: 'e24', x: 96, z: -176, y: 1, region: 'shallows', title: 'A Pergunta', lines: [
+  { id: 'e24', x: 96, z: -176, y: 4.7, region: 'shallows', title: 'A Pergunta', lines: [
     '"Se o mundo é uma canção, quem está escutando?"',
     '"É isso que o Oco é. O Coro descobriu."',
   ]},
@@ -372,25 +397,25 @@ export const ECHOES = [
 export const CANTOS = [
   { id: 'c01', x: -3, z: -292, y: 36, title: 'Canto I — Antes do Sal', text:
     'Antes do Alcance havia apenas escuta. O Coro não criou o mar; encontrou-o cantarolando e cantarolou de volta, até ele tomar uma forma onde fosse possível andar.' },
-  { id: 'c02', x: 47, z: -244, y: 9, title: 'Canto II — Os Cantores', text:
+  { id: 'c02', x: 47, z: -244, y: 18.5, title: 'Canto II — Os Cantores', text:
     'Oito Cantores entoaram os Oito Versos Inacabados. O primeiro era pedra, o último era um menino de dezenove anos. Pedra é paciente. Menino não é — e foi exatamente por isso que o Oco o quis.' },
   { id: 'c03', x: -92, z: -46, y: 1, title: 'Canto III — A Lei dos Vasos', text:
     'Uma Ouvinte é um vaso. Um vaso precisa ser esvaziado antes de ser cheio, e o esvaziar é a parte sobre a qual ninguém te avisa.' },
-  { id: 'c04', x: 254, z: -96, y: 22, title: 'Canto IV — O Coral que Lembra', text:
+  { id: 'c04', x: 254, z: -96, y: 16.9, title: 'Canto IV — O Coral que Lembra', text:
     'O coral cresce na direção da luz, mesmo quando não há luz. Ele lembra para onde o sol estaria e se inclina. O Ossuário se inclinou tanto que virou um cantor.' },
   { id: 'c05', x: -226, z: 26, y: 3, title: 'Canto V — A Planície de Vidro', text:
     'Seis Cantores escolheram morrer deitados, para que o silêncio deles fosse largo o bastante para nos proteger. Andamos sobre a determinação deles. É fria ao toque.' },
-  { id: 'c06', x: 30, z: 232, y: 1, title: 'Canto VI — A Nona Voz', text:
+  { id: 'c06', x: 30, z: 232, y: 4.3, title: 'Canto VI — A Nona Voz', text:
     'Nove Cantores eram necessários para Nove Versos, mas o Coro só encontrou oito. Então o mais novo, Orin, foi feito para cantar duas partes ao mesmo tempo — a oitava e a nona — com o mar escutando entre elas.' },
-  { id: 'c07', x: 0, z: 300, y: 1, title: 'Canto VII — O Que Espera no Oco', text:
+  { id: 'c07', x: 0, z: 300, y: 11.1, title: 'Canto VII — O Que Espera no Oco', text:
     'Não é um vazio. É um fôlego suspenso do tamanho de um céu. Espera permissão. Pergunte com delicadeza: você terminou, ou está com medo?' },
-  { id: 'c08', x: -24, z: -258, y: 34, title: 'Canto VIII — O Nono Verso', text:
+  { id: 'c08', x: -24, z: -258, y: 24.1, title: 'Canto VIII — O Nono Verso', text:
     'O Nono Verso nunca recebeu palavras. Recebeu uma pergunta no lugar: em que se transforma uma canção quando lhe é permitido terminar? Orin ainda segura a nota que responde.' },
 ];
 
 export const SECRETS = [
   { id: 's01', name: 'Oco da Primeira Palavra', x: -118, z: -108, reward: 'charm_echo', desc: 'Uma caverna sob os baixios onde a primeira palavra foi gravada — e depois riscada.' },
-  { id: 's02', name: 'O Jardim de Vidro', x: -246, z: -140, reward: 'charm_glass', desc: 'Um jardim de flores de vidro que só desabrocham quando ninguém está olhando.' },
+  { id: 's02', name: 'O Jardim de Vidro', x: -292, z: -142, y: 2.3, reward: 'charm_glass', desc: 'Um jardim de flores de vidro que só desabrocham quando ninguém está olhando.' },
   { id: 's03', name: 'Ninho das Asas-de-Brasa', x: 238, z: 14, reward: 'charm_wing', desc: 'Centenas de lanternas de papel dormindo numa garganta de coral.' },
   { id: 's04', name: 'As Botas de Orin', x: 78, z: 292, reward: 'charm_verse', desc: 'Duas marcas de bota na beira do abismo, voltadas para dentro, pontas juntas. Ele ficou aqui muito tempo.' },
   { id: 's05', name: 'A Pedra que Escuta', x: 132, z: -168, reward: 'charm_still', desc: 'Uma pedra em forma de orelha. Prenda a respiração dentro dela e dá para ouvir Ashbend respirando.' },
@@ -408,7 +433,7 @@ export const CHARMS = [
 // NPCs
 // ---------------------------------------------------------------------------------------------
 export const NPCS = [
-  { id: 'senn', name: 'Mãe Senn', role: 'Guardiã do Último Verso', x: -20, z: -262, y: 35, region: 'kneeling',
+  { id: 'senn', name: 'Mãe Senn', role: 'Guardiã do Último Verso', x: -20, z: -262, y: 25.4, region: 'kneeling',
     color: 0xe8d9b0, lines: [
       'Você acordou. Bom. Os sinos tocam errado desde o amanhecer, e só você ouve em que direção.',
       'Isso não é um elogio, Aru. É um dever. O Oco está à porta e a nossa porta é muito velha.',
@@ -426,7 +451,7 @@ export const NPCS = [
       'O Alcance canta se você ficar parada o bastante. Nunca tive paciência. Você parece ter de sobra.',
       'Pegue o caminho oeste. O Terceiro Sino está no anfiteatro em ruínas. A acústica faz coisas com os seus ossos.',
     ]},
-  { id: 'marrow', name: 'O Guardião do Tutano', role: 'O que restou do Segundo Cantor', x: 214, z: -66, y: 22, region: 'ossuary',
+  { id: 'marrow', name: 'O Guardião do Tutano', role: 'O que restou do Segundo Cantor', x: 214, z: -66, y: 18.3, region: 'ossuary',
     color: 0x9fe8d8, lines: [
       'Eu era cantor. Agora sou um cômodo.',
       'O sino que você procura está no meu peito. Leve-o. Mas me deixe o eco — é a última coisa que possuo.',

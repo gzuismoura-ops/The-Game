@@ -457,6 +457,65 @@ if (!game) {
     ok('returns to title after ending');
   } catch (e) { fail('ending flow', e); }
 
+  // ---------- world consistency: no collectible may float or sink
+  try {
+    const surf = (x, z) => {
+      const d = game.constructor.deckHeightAt ? game.constructor.deckHeightAt(x, z) : null;
+      return game.surfaceY(x, z);
+    };
+    let bad = [];
+    const check = (kind, list) => {
+      for (const o of list) {
+        if (typeof o.y !== 'number') continue;
+        const g = game.surfaceY(o.x, o.z);
+        if (Math.abs(o.y - g) > 6) bad.push(`${kind} ${o.id}: authored y=${o.y} vs ground=${g.toFixed(1)}`);
+      }
+    };
+    check('echo', game.echoObjects.map((e) => e.data));
+    check('canto', game.cantoObjects.map((c) => c.data));
+    if (bad.length === 0) ok('world objects sit on their ground (52 checked)');
+    else fail('world object placement', bad.slice(0, 4).join('; ') + (bad.length > 4 ? ` +${bad.length - 4} more` : ''));
+  } catch (e) { fail('world placement check', e); }
+
+  // ---------- every piece of content must be reachable on foot from spawn
+  // A collectible inside a 50-degree bowl or below the waterline is content the player
+  // can see on the map and never touch. This is the difference between "it runs" and
+  // "it is playable", so it gets a hard test.
+  try {
+    const world = await import(pathToFileURL(process.cwd() + '/src/world/world.js').href);
+    const terrainHeight = world.terrainHeight;
+    const STEP = 1.5, HALF = 340, N = Math.floor((HALF * 2) / STEP);
+    const H = new Float32Array(N * N);
+    for (let i = 0; i < N; i++) for (let j = 0; j < N; j++)
+      H[i * N + j] = terrainHeight(-HALF + i * STEP, -HALF + j * STEP);
+    const seen = new Uint8Array(N * N);
+    const sx = Math.round((0 + HALF) / STEP), sz = Math.round((-288 + HALF) / STEP);
+    const q = [sx * N + sz]; seen[q[0]] = 1;
+    for (let head = 0; head < q.length; head++) {
+      const k = q[head], i = Math.floor(k / N), j = k % N;
+      for (const [di, dj] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+        const ni = i + di, nj = j + dj;
+        if (ni < 0 || nj < 0 || ni >= N || nj >= N) continue;
+        const nk = ni * N + nj;
+        if (seen[nk]) continue;
+        if (Math.abs(H[nk] - H[k]) / STEP > 0.85) continue;   // per-step climb limit
+        if (H[nk] < -0.35) continue;                          // open water
+        seen[nk] = 1; q.push(nk);
+      }
+    }
+    const reachable = (x, z) => {
+      const i = Math.round((x + HALF) / STEP), j = Math.round((z + HALF) / STEP);
+      return i >= 0 && j >= 0 && i < N && j < N && seen[i * N + j] === 1;
+    };
+    const unreachable = [];
+    for (const [kind, list] of [['echo', world.ECHOES], ['canto', world.CANTOS], ['secret', world.SECRETS],
+                                ['shrine', world.SHRINES], ['bell', world.BELLS], ['npc', world.NPCS]]) {
+      for (const o of list) if (!reachable(o.x, o.z)) unreachable.push(`${kind} ${o.id}`);
+    }
+    if (unreachable.length === 0) ok('every collectible, shrine, bell and NPC is reachable on foot from spawn');
+    else fail('content reachability', `${unreachable.length} unreachable: ${unreachable.slice(0, 5).join(', ')}`);
+  } catch (e) { fail('reachability check', e); }
+
   // ---------- regional atmosphere must actually reach the shaders
   try {
     game.applyTerrainLook(game.regionLook('hollow', 0));
