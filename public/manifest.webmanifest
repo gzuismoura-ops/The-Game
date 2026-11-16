@@ -1,7 +1,7 @@
 {
-  "name": "Y'SMARA — The Hollow Hymn",
+  "name": "Y'SMARA — O Hino Oco",
   "short_name": "Y'SMARA",
-  "description": "An original offline 3D action-adventure. Sing the Nine Verses, cross the drowned coast, and reach the Hollow where the Hymn began.",
+  "description": "Aventura 3D original e offline. Cante os Nove Versos, cruze a costa afogada e chegue ao Oco onde o Hino começou.",
   "id": "/",
   "start_url": "./",
   "scope": "./",
@@ -11,7 +11,7 @@
   "background_color": "#0b0d10",
   "theme_color": "#0b0d10",
   "categories": ["games", "entertainment"],
-  "lang": "en",
+  "lang": "pt-BR",
   "dir": "ltr",
   "icons": [
     { "src": "./icons/icon-72.png",  "sizes": "72x72",   "type": "image/png", "purpose": "any" },

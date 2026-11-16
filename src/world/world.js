@@ -24,35 +24,35 @@ export const WORLD = {
 
 export const REGIONS = [
   {
-    id: 'kneeling', name: 'The Kneeling One', short: 'Ashbend',
+    id: 'kneeling', name: 'O Ajoelhado', short: 'Ashbend',
     center: { x: 0, z: -300 }, radius: 105,
     ambience: 'wind_high', scale: 'dorian', root: 146.83, mood: 0.35,
     palette: { ground: 0x6e6150, accent: 0xd8a862, fog: 0x9a8d78, sky: 0x7f9cb4, water: 0x24383e },
     blurb: 'A god of stone, kneeling so long the world grew over it. Ashbend village rides its shoulders.',
   },
   {
-    id: 'shallows', name: 'The Silt Shallows', short: 'Shallows',
+    id: 'shallows', name: 'Os Baixios de Lodo', short: 'Baixios',
     center: { x: 0, z: -40 }, radius: 190,
     ambience: 'water_lap', scale: 'aeolian', root: 130.81, mood: 0.5,
     palette: { ground: 0x7d6d4a, accent: 0xc9a978, fog: 0xb0a184, sky: 0x8fa9bc, water: 0x2b3f44 },
     blurb: 'A mirror one finger deep. The sky walks there, and so do the Mutes.',
   },
   {
-    id: 'ossuary', name: 'The Coral Ossuary', short: 'Ossuary',
+    id: 'ossuary', name: 'O Ossuário de Coral', short: 'Ossuário',
     center: { x: 196, z: -30 }, radius: 150,
     ambience: 'cave_drip', scale: 'phrygian', root: 123.47, mood: 0.65,
     palette: { ground: 0x5f4c47, accent: 0x6fc4b2, fog: 0x6b7a7e, sky: 0x6a8492, water: 0x182f35 },
     blurb: 'The ribs of a Cantor that sang itself to death. Something still hums in the marrow.',
   },
   {
-    id: 'glass', name: 'The Glass Reach', short: 'Glass',
+    id: 'glass', name: 'O Alcance de Vidro', short: 'Vidro',
     center: { x: -206, z: -20 }, radius: 148,
     ambience: 'wind_glass', scale: 'lydian', root: 155.56, mood: 0.45,
     palette: { ground: 0x5e6b78, accent: 0x9fd8ea, fog: 0x8f9fae, sky: 0x6d8ba8, water: 0x1e343e },
     blurb: 'A sea that forgot how to be water. Every shard remembers a different sunset.',
   },
   {
-    id: 'hollow', name: 'The Hollow', short: 'Hollow',
+    id: 'hollow', name: 'O Oco', short: 'Oco',
     center: { x: 6, z: 268 }, radius: 132,
     ambience: 'silence', scale: 'locrian', root: 110.0, mood: 0.9,
     palette: { ground: 0x2f2a2c, accent: 0x6e5c6c, fog: 0x46423f, sky: 0x3a3f45, water: 0x101b1f },
@@ -251,192 +251,192 @@ export function pathDistance(x, z) {
 // LANDMARKS, SHRINES, ECHOES (memory collectibles), CANTOS (lore), SECRETS
 // ---------------------------------------------------------------------------------------------
 export const SHRINES = [
-  { id: 'shrine_ashbend', name: 'Bell of Ashbend', x: -14, z: -272, region: 'kneeling' },
-  { id: 'shrine_causeway', name: 'Bell of the Causeway', x: 8, z: -150, region: 'shallows' },
-  { id: 'shrine_kell', name: 'Bell of Kell', x: -38, z: -46, region: 'shallows' },
-  { id: 'shrine_drowned', name: 'Bell of the Drowned Field', x: 84, z: 74, region: 'shallows' },
-  { id: 'shrine_ossuary', name: 'Bell of the Marrow', x: 196, z: -88, region: 'ossuary' },
-  { id: 'shrine_glass', name: 'Bell of Glass', x: -214, z: -56, region: 'glass' },
-  { id: 'shrine_verge', name: 'Bell on the Verge', x: 4, z: 128, region: 'hollow' },
+  { id: 'shrine_ashbend', name: 'Sino de Ashbend', x: -14, z: -272, region: 'kneeling' },
+  { id: 'shrine_causeway', name: 'Sino da Passagem', x: 8, z: -150, region: 'shallows' },
+  { id: 'shrine_kell', name: 'Sino de Kell', x: -38, z: -46, region: 'shallows' },
+  { id: 'shrine_drowned', name: 'Sino do Campo Afogado', x: 84, z: 74, region: 'shallows' },
+  { id: 'shrine_ossuary', name: 'Sino do Tutano', x: 196, z: -88, region: 'ossuary' },
+  { id: 'shrine_glass', name: 'Sino do Vidro', x: -214, z: -56, region: 'glass' },
+  { id: 'shrine_verge', name: 'Sino na Beira', x: 4, z: 128, region: 'hollow' },
 ];
 
 export const BELLS = [
-  { id: 'bell_ossuary', name: 'Second Bell — the Marrow Chime', x: 208, z: -52, region: 'ossuary',
+  { id: 'bell_ossuary', name: 'Segundo Sino — o Dobrar do Tutano', x: 208, z: -52, region: 'ossuary',
     hint: 'East, in the ribs of the dead Cantor.' },
-  { id: 'bell_glass', name: 'Third Bell — the Glass Knell', x: -206, z: -84, region: 'glass',
+  { id: 'bell_glass', name: 'Terceiro Sino — o Repique de Vidro', x: -206, z: -84, region: 'glass',
     hint: 'West, where the sea forgot how to be water.' },
-  { id: 'bell_hollow', name: 'Fourth Bell — the Unrung', x: 8, z: 206, region: 'hollow',
+  { id: 'bell_hollow', name: 'Quarto Sino — o Não Tocado', x: 8, z: 206, region: 'hollow',
     hint: 'South, at the door of the Hollow. Do not ring it alone.' },
 ];
 
 // 24 memory echoes: each is a short playable vignette of text + ghost imagery
 export const ECHOES = [
-  { id: 'e01', x: -18, z: -270, y: 34, region: 'kneeling', title: 'The Ninth Verse', lines: [
-    'Mother Senn: "Eight verses. Eight Reaches. The Choir sang until the sea obeyed."',
-    'Mother Senn: "The Ninth had no words yet. So the Choir hummed. And the humming opened something."',
+  { id: 'e01', x: -18, z: -270, y: 34, region: 'kneeling', title: 'O Nono Verso', lines: [
+    'Mãe Senn: "Oito versos. Oito Alcances. O Coro cantou até o mar obedecer."',
+    'Mãe Senn: "O Nono ainda não tinha palavra. Então o Coro cantarolou. E o cantarolar abriu alguma coisa."',
   ]},
-  { id: 'e02', x: 26, z: -258, y: 34, region: 'kneeling', title: 'First Fall', lines: [
-    '"The Kneeling One was the first Cantor. It knelt to hear the Verse better."',
-    '"It has not stood since. We built our roofs on its patience."',
+  { id: 'e02', x: 26, z: -258, y: 34, region: 'kneeling', title: 'Primeira Queda', lines: [
+    '"O Ajoelhado foi o primeiro Cantor. Ele se ajoelhou para ouvir o Verso melhor."',
+    '"Nunca mais se levantou. Construímos nossos telhados sobre a paciência dele."',
   ]},
-  { id: 'e03', x: -52, z: -238, y: 8, region: 'kneeling', title: 'Salt Lullaby', lines: [
-    'A child hums four notes. The wind answers with three.',
-    '"Never finish a song you did not start," says the grandmother. "The Hollow listens for endings."',
+  { id: 'e03', x: -52, z: -238, y: 8, region: 'kneeling', title: 'Canção de Ninar Salgada', lines: [
+    'Uma criança cantarola quatro notas. O vento responde com três.',
+    '"Nunca termine uma canção que você não começou", diz a avó. "O Oco escuta os finais."',
   ]},
-  { id: 'e04', x: 4, z: -196, y: 2, region: 'shallows', title: 'The Causeway', lines: [
-    'Pilgrims walked this road when there was still road under it.',
-    'Their footprints filled with salt and became the stones you are standing on.',
+  { id: 'e04', x: 4, z: -196, y: 2, region: 'shallows', title: 'A Passagem', lines: [
+    'Peregrinos andaram por esta estrada quando ainda havia estrada embaixo dela.',
+    'As pegadas encheram de sal e viraram as pedras onde você pisa agora.',
   ]},
-  { id: 'e05', x: -64, z: -150, y: 2, region: 'shallows', title: 'Mute Dance', lines: [
-    'The Mutes were singers once. They gave their voices to the Choir as tribute.',
-    'Now they open their mouths and nothing comes out — but they still keep time.',
+  { id: 'e05', x: -64, z: -150, y: 2, region: 'shallows', title: 'Dança dos Mudos', lines: [
+    'Os Mudos já foram cantores. Deram a voz ao Coro como tributo.',
+    'Agora abrem a boca e não sai nada — mas ainda mantêm o compasso.',
   ]},
-  { id: 'e06', x: 62, z: -108, y: 1, region: 'shallows', title: 'Sky in the Water', lines: [
-    '"When the water is still enough, you can see the sky that used to be."',
-    '"Look for a moon with two shadows. That is the sky the Choir left behind."',
+  { id: 'e06', x: 62, z: -108, y: 1, region: 'shallows', title: 'Céu Dentro da Água', lines: [
+    '"Quando a água fica parada o bastante, dá para ver o céu que existia antes."',
+    '"Procure uma lua com duas sombras. É o céu que o Coro deixou para trás."',
   ]},
-  { id: 'e07', x: -30, z: -66, y: 1, region: 'shallows', title: 'Kell Village', lines: [
-    'Kell was built on stilts so the tide could pass beneath and take nothing but rope.',
-    'It took the rope anyway. Kell rebuilt with rope that remembered being a chandelier.',
+  { id: 'e07', x: -30, z: -66, y: 1, region: 'shallows', title: 'Vila de Kell', lines: [
+    'Kell foi construída sobre palafitas para a maré passar por baixo e não levar nada além de corda.',
+    'Levou a corda de todo jeito. Kell reconstruiu com corda que lembrava ter sido lustre.',
   ]},
-  { id: 'e08', x: 118, z: -70, y: 1, region: 'shallows', title: 'A Bell Without a Tower', lines: [
-    'The bells were not made to call people. They were made to answer the Choir.',
-    'Every bell is a question. The Choir stopped asking.',
+  { id: 'e08', x: 118, z: -70, y: 1, region: 'shallows', title: 'Um Sino Sem Torre', lines: [
+    'Os sinos não foram feitos para chamar gente. Foram feitos para responder ao Coro.',
+    'Todo sino é uma pergunta. O Coro parou de perguntar.',
   ]},
-  { id: 'e09', x: -140, z: 22, y: 2, region: 'shallows', title: 'The Salt Road', lines: [
-    'Two families walked west for three years and arrived at the same beach.',
-    'They named it Arrival. Then they walked home.',
+  { id: 'e09', x: -140, z: 22, y: 2, region: 'shallows', title: 'A Estrada de Sal', lines: [
+    'Duas famílias andaram para oeste por três anos e chegaram à mesma praia.',
+    'Chamaram o lugar de Chegada. Depois voltaram para casa andando.',
   ]},
-  { id: 'e10', x: 0, z: 96, y: 1, region: 'shallows', title: 'Verge', lines: [
-    'Grass stops growing here. Not dying — stopping, mid-sentence.',
-    'The Hollow does not kill. It interrupts.',
+  { id: 'e10', x: 0, z: 96, y: 1, region: 'shallows', title: 'Beira', lines: [
+    'A grama para de crescer aqui. Não morre — para, no meio da frase.',
+    'O Oco não mata. Ele interrompe.',
   ]},
-  { id: 'e11', x: 196, z: -120, y: 14, region: 'ossuary', title: 'The Cantor', lines: [
-    'The Ossuary is not bone. Bone would have rotted.',
-    'It is coral that grew in the shape of a singer as it listened.',
+  { id: 'e11', x: 196, z: -120, y: 14, region: 'ossuary', title: 'O Cantor', lines: [
+    'O Ossuário não é osso. Osso teria apodrecido.',
+    'É coral que cresceu no formato de um cantor enquanto escutava.',
   ]},
-  { id: 'e12', x: 232, z: -40, y: 18, region: 'ossuary', title: 'Marrow Hymn', lines: [
-    'The Second Verse is still inside these ribs, folded like a hand.',
-    'Touch the wall and you can feel it decide whether to hold on.',
+  { id: 'e12', x: 232, z: -40, y: 18, region: 'ossuary', title: 'Hino do Tutano', lines: [
+    'O Segundo Verso ainda está dentro destas costelas, dobrado como uma mão.',
+    'Toque a parede e dá para sentir ele decidindo se continua.',
   ]},
-  { id: 'e13', x: 168, z: 6, y: 6, region: 'ossuary', title: 'Lumen Spawn', lines: [
-    'The glowing spores are the Cantor\'s last breath, still drifting.',
-    'They light the way for anyone who has given up on torches.',
+  { id: 'e13', x: 168, z: 6, y: 6, region: 'ossuary', title: 'Cria de Lume', lines: [
+    'Os esporos brilhantes são o último suspiro do Cantor, ainda à deriva.',
+    'Iluminam o caminho de quem já desistiu das tochas.',
   ]},
-  { id: 'e14', x: 206, z: -52, y: 26, region: 'ossuary', title: 'Second Bell', lines: [
-    'The Marrow Chime rings a note the Cantor could not finish.',
-    'Listen closely: it is not a note. It is a door.',
+  { id: 'e14', x: 206, z: -52, y: 26, region: 'ossuary', title: 'Segundo Sino', lines: [
+    'O Dobrar do Tutano toca uma nota que o Cantor não conseguiu terminar.',
+    'Escute bem: não é uma nota. É uma porta.',
   ]},
-  { id: 'e15', x: -238, z: -84, y: 2, region: 'glass', title: 'Glass Knell', lines: [
-    'The pan is not sand. It is every sunset that ever fell here, cooled and pressed flat.',
-    'Step lightly. They are still setting.',
+  { id: 'e15', x: -238, z: -84, y: 2, region: 'glass', title: 'Repique de Vidro', lines: [
+    'A planície não é areia. É todo pôr do sol que já caiu aqui, esfriado e prensado liso.',
+    'Pise leve. Ainda estão endurecendo.',
   ]},
-  { id: 'e16', x: -196, z: -6, y: 2, region: 'glass', title: 'The Shattered Choir', lines: [
-    'Six Cantors stood here. The Hollow did not take them — they shattered.',
-    'Silence does that to a body that will not stop singing.',
+  { id: 'e16', x: -196, z: -6, y: 2, region: 'glass', title: 'O Coro Estilhaçado', lines: [
+    'Seis Cantores estavam aqui. O Oco não os levou — eles se estilhaçaram.',
+    'O silêncio faz isso com um corpo que não para de cantar.',
   ]},
-  { id: 'e17', x: -170, z: -70, y: 2, region: 'glass', title: 'Mirror Walk', lines: [
-    'A glass shard shows your reflection singing. You are not singing.',
-    'It is polite. It is showing you what the Reach remembers.',
+  { id: 'e17', x: -170, z: -70, y: 2, region: 'glass', title: 'Caminho de Espelhos', lines: [
+    'Um pedaço de vidro mostra o seu reflexo cantando. Você não está cantando.',
+    'Ele é educado. Está mostrando o que o Alcance lembra.',
   ]},
-  { id: 'e18', x: -252, z: 40, y: 4, region: 'glass', title: 'The Last Sunset', lines: [
-    'The Reach kept one complete sunset, in case the sky ever needed reminding.',
-    'It is behind you, on the largest shard. Do not turn around too quickly.',
+  { id: 'e18', x: -252, z: 40, y: 4, region: 'glass', title: 'O Último Pôr do Sol', lines: [
+    'O Alcance guardou um pôr do sol completo, caso o céu algum dia precisasse lembrar.',
+    'Está atrás de você, no maior vidro. Não vire rápido demais.',
   ]},
-  { id: 'e19', x: 10, z: 168, y: 4, region: 'hollow', title: 'Interruption', lines: [
-    'Here is a sentence: "The Choir sang because—"',
-    'The Hollow was not strong enough to finish it either.',
+  { id: 'e19', x: 10, z: 168, y: 4, region: 'hollow', title: 'Interrupção', lines: [
+    'Eis uma frase: "O Coro cantou porque—"',
+    'O Oco também não foi forte o bastante para terminá-la.',
   ]},
-  { id: 'e20', x: -60, z: 206, y: 1, region: 'hollow', title: 'The Held Note', lines: [
-    '"Orin sings two parts at once. The Hollow grew in the space between his two voices."',
-    '"He thinks he is holding us together. He might even be right."',
+  { id: 'e20', x: -60, z: 206, y: 1, region: 'hollow', title: 'A Nota Suspensa', lines: [
+    '"Orin canta duas partes ao mesmo tempo. O Oco cresceu no espaço entre as duas vozes dele."',
+    '"Ele acha que está nos mantendo inteiros. Talvez até esteja certo."',
   ]},
-  { id: 'e21', x: 66, z: 240, y: 1, region: 'hollow', title: 'Ash Choir', lines: [
-    'The ash is not burned wood. It is every note the ninth voice could not reach.',
-    'They are still falling, slowly, like an argument losing its temper.',
+  { id: 'e21', x: 66, z: 240, y: 1, region: 'hollow', title: 'Coro de Cinzas', lines: [
+    'As cinzas não são madeira queimada. São todas as notas que a nona voz não alcançou.',
+    'Continuam caindo, devagar, como uma discussão perdendo a paciência.',
   ]},
-  { id: 'e22', x: 0, z: 282, y: 1, region: 'hollow', title: 'The Maw', lines: [
-    'Up close the Hollow is not quiet. It is the sound of a held breath.',
-    'Which means somewhere, someone is waiting to breathe.',
+  { id: 'e22', x: 0, z: 282, y: 1, region: 'hollow', title: 'O Abismo', lines: [
+    'De perto o Oco não é silencioso. É o som de um fôlego suspenso.',
+    'O que significa que, em algum lugar, alguém espera para respirar.',
   ]},
-  { id: 'e23', x: -96, z: -214, y: 30, region: 'kneeling', title: 'Vela\'s Nest', lines: [
-    'A little cinderwing built a nest of bell-clappers and tooth-thin rope.',
-    'She is not a bird. But she decided to be one, and the world allowed it.',
+  { id: 'e23', x: -96, z: -214, y: 30, region: 'kneeling', title: 'Ninho de Vela', lines: [
+    'Uma pequena asa-de-brasa fez um ninho de badalos e corda fina como dente.',
+    'Ela não é pássaro. Mas decidiu ser um, e o mundo permitiu.',
   ]},
-  { id: 'e24', x: 96, z: -176, y: 1, region: 'shallows', title: 'The Question', lines: [
-    '"If the world is a song, who is listening?"',
-    '"That is what the Hollow is. The Choir found out."',
+  { id: 'e24', x: 96, z: -176, y: 1, region: 'shallows', title: 'A Pergunta', lines: [
+    '"Se o mundo é uma canção, quem está escutando?"',
+    '"É isso que o Oco é. O Coro descobriu."',
   ]},
 ];
 
 export const CANTOS = [
-  { id: 'c01', x: -3, z: -292, y: 36, title: 'Canto I — Before Salt', text:
-    'Before the Reach there was only listening. The Choir did not create the sea; they found it humming and hummed back until it took a shape they could walk on.' },
-  { id: 'c02', x: 47, z: -244, y: 9, title: 'Canto II — The Cantors', text:
-    'Eight Cantors sang the Eight Unfinished Verses. The first was stone, the last was a boy of nineteen. Stone is patient. Boys are not — and that is exactly why the Hollow wanted him.' },
-  { id: 'c03', x: -92, z: -46, y: 1, title: 'Canto III — The Law of Vessels', text:
-    'A Listener is a vessel. A vessel must be emptied before it is filled, and the emptying is the part no one warns you about.' },
-  { id: 'c04', x: 254, z: -96, y: 22, title: 'Canto IV — Coral Remembering', text:
-    'Coral grows toward the light, even when there is no light. It remembers the direction the sun would be and leans. The Ossuary leans so far it became a singer.' },
-  { id: 'c05', x: -226, z: 26, y: 3, title: 'Canto V — The Glass Pan', text:
-    'Six Cantors chose to die flat, so their silence would be broad enough to protect us. We walk on their resolve. It is cool to the touch.' },
-  { id: 'c06', x: 30, z: 232, y: 1, title: 'Canto VI — The Ninth Voice', text:
-    'Nine Cantors were needed for Nine Verses, but the Choir could only find eight. So the youngest, Orin, was made to sing two parts at once — the eighth and the ninth — with the sea listening in between them.' },
-  { id: 'c07', x: 0, z: 300, y: 1, title: 'Canto VII — What Waits in the Hollow', text:
-    'It is not a void. It is a held breath the size of a sky. It is waiting for permission. Ask it nicely: are you finished, or are you afraid?' },
-  { id: 'c08', x: -24, z: -258, y: 34, title: 'Canto VIII — The Ninth Verse', text:
-    'The Ninth Verse was never given words. It was given a question instead: what does a song become when it is allowed to end? Orin is still holding the note that answers it.' },
+  { id: 'c01', x: -3, z: -292, y: 36, title: 'Canto I — Antes do Sal', text:
+    'Antes do Alcance havia apenas escuta. O Coro não criou o mar; encontrou-o cantarolando e cantarolou de volta, até ele tomar uma forma onde fosse possível andar.' },
+  { id: 'c02', x: 47, z: -244, y: 9, title: 'Canto II — Os Cantores', text:
+    'Oito Cantores entoaram os Oito Versos Inacabados. O primeiro era pedra, o último era um menino de dezenove anos. Pedra é paciente. Menino não é — e foi exatamente por isso que o Oco o quis.' },
+  { id: 'c03', x: -92, z: -46, y: 1, title: 'Canto III — A Lei dos Vasos', text:
+    'Uma Ouvinte é um vaso. Um vaso precisa ser esvaziado antes de ser cheio, e o esvaziar é a parte sobre a qual ninguém te avisa.' },
+  { id: 'c04', x: 254, z: -96, y: 22, title: 'Canto IV — O Coral que Lembra', text:
+    'O coral cresce na direção da luz, mesmo quando não há luz. Ele lembra para onde o sol estaria e se inclina. O Ossuário se inclinou tanto que virou um cantor.' },
+  { id: 'c05', x: -226, z: 26, y: 3, title: 'Canto V — A Planície de Vidro', text:
+    'Seis Cantores escolheram morrer deitados, para que o silêncio deles fosse largo o bastante para nos proteger. Andamos sobre a determinação deles. É fria ao toque.' },
+  { id: 'c06', x: 30, z: 232, y: 1, title: 'Canto VI — A Nona Voz', text:
+    'Nove Cantores eram necessários para Nove Versos, mas o Coro só encontrou oito. Então o mais novo, Orin, foi feito para cantar duas partes ao mesmo tempo — a oitava e a nona — com o mar escutando entre elas.' },
+  { id: 'c07', x: 0, z: 300, y: 1, title: 'Canto VII — O Que Espera no Oco', text:
+    'Não é um vazio. É um fôlego suspenso do tamanho de um céu. Espera permissão. Pergunte com delicadeza: você terminou, ou está com medo?' },
+  { id: 'c08', x: -24, z: -258, y: 34, title: 'Canto VIII — O Nono Verso', text:
+    'O Nono Verso nunca recebeu palavras. Recebeu uma pergunta no lugar: em que se transforma uma canção quando lhe é permitido terminar? Orin ainda segura a nota que responde.' },
 ];
 
 export const SECRETS = [
-  { id: 's01', name: 'Hollow of the First Word', x: -118, z: -108, reward: 'charm_echo', desc: 'A cave under the shallows where the very first word was carved — and then scratched out.' },
-  { id: 's02', name: 'The Glass Garden', x: -246, z: -140, reward: 'charm_glass', desc: 'A garden of glass flowers that only bloom when no one is looking.' },
-  { id: 's03', name: 'Nest of the Cinderwings', x: 238, z: 14, reward: 'charm_wing', desc: 'Hundreds of paper lanterns sleeping in a coral throat.' },
-  { id: 's04', name: 'Orin\'s Boots', x: 78, z: 292, reward: 'charm_verse', desc: 'Two bootprints at the edge of the maw, facing in, toes together. He stood here a long time.' },
-  { id: 's05', name: 'The Listening Stone', x: 132, z: -168, reward: 'charm_still', desc: 'A stone shaped like an ear. Hold your breath inside it and you can hear Ashbend breathing.' },
+  { id: 's01', name: 'Oco da Primeira Palavra', x: -118, z: -108, reward: 'charm_echo', desc: 'Uma caverna sob os baixios onde a primeira palavra foi gravada — e depois riscada.' },
+  { id: 's02', name: 'O Jardim de Vidro', x: -246, z: -140, reward: 'charm_glass', desc: 'Um jardim de flores de vidro que só desabrocham quando ninguém está olhando.' },
+  { id: 's03', name: 'Ninho das Asas-de-Brasa', x: 238, z: 14, reward: 'charm_wing', desc: 'Centenas de lanternas de papel dormindo numa garganta de coral.' },
+  { id: 's04', name: 'As Botas de Orin', x: 78, z: 292, reward: 'charm_verse', desc: 'Duas marcas de bota na beira do abismo, voltadas para dentro, pontas juntas. Ele ficou aqui muito tempo.' },
+  { id: 's05', name: 'A Pedra que Escuta', x: 132, z: -168, reward: 'charm_still', desc: 'Uma pedra em forma de orelha. Prenda a respiração dentro dela e dá para ouvir Ashbend respirando.' },
 ];
 
 export const CHARMS = [
-  { id: 'charm_echo', name: 'Echo Charm', desc: 'Echoes you collect drift toward you from farther away.', color: 0x7fe3d4 },
-  { id: 'charm_glass', name: 'Glass Charm', desc: 'Dissonance step leaves a ring of sharp wind that damages Mutes.', color: 0xcfe8f2 },
-  { id: 'charm_wing', name: 'Cinder Charm', desc: 'Vela circles closer and lights dark caves; +1 stamina bar.', color: 0xffb066 },
-  { id: 'charm_verse', name: 'Verse Charm', desc: 'Your hymn charges 30% faster.', color: 0xe6b8ff },
-  { id: 'charm_still', name: 'Stillness Charm', desc: 'The Hollow\'s silence drains you more slowly.', color: 0xb8d4ff },
+  { id: 'charm_echo', name: 'Amuleto do Eco', desc: 'Os ecos que você coleta se aproximam de mais longe.', color: 0x7fe3d4 },
+  { id: 'charm_glass', name: 'Amuleto de Vidro', desc: 'A esquiva dissonante deixa um anel de vento cortante que fere os Mudos.', color: 0xcfe8f2 },
+  { id: 'charm_wing', name: 'Amuleto de Brasa', desc: 'Vela voa mais perto e ilumina cavernas escuras; +1 barra de fôlego.', color: 0xffb066 },
+  { id: 'charm_verse', name: 'Amuleto do Verso', desc: 'Seu hino carrega 30% mais rápido.', color: 0xe6b8ff },
+  { id: 'charm_still', name: 'Amuleto da Quietude', desc: 'O silêncio do Oco te drena mais devagar.', color: 0xb8d4ff },
 ];
 
 // ---------------------------------------------------------------------------------------------
 // NPCs
 // ---------------------------------------------------------------------------------------------
 export const NPCS = [
-  { id: 'senn', name: 'Mother Senn', role: 'Keeper of the Last Verse', x: -20, z: -262, y: 35, region: 'kneeling',
+  { id: 'senn', name: 'Mãe Senn', role: 'Guardiã do Último Verso', x: -20, z: -262, y: 35, region: 'kneeling',
     color: 0xe8d9b0, lines: [
-      'You woke. Good. The bells have been ringing wrong since dawn, and only you can hear which way.',
-      'That is not a compliment, Aru. It is a duty. The Hollow is at the door and our door is very old.',
-      'Go down to Kell. Find Wren. She has been putting a map together out of fish scales and spite.',
+      'Você acordou. Bom. Os sinos tocam errado desde o amanhecer, e só você ouve em que direção.',
+      'Isso não é um elogio, Aru. É um dever. O Oco está à porta e a nossa porta é muito velha.',
+      'Desça até Kell. Encontre Wren. Ela anda montando um mapa com escamas de peixe e rancor.',
     ]},
-  { id: 'wren', name: 'Wren', role: 'Rope-mender, mapmaker, skeptic', x: -44, z: -52, y: 1, region: 'shallows',
+  { id: 'wren', name: 'Wren', role: 'Remenda cordas, faz mapas, desconfia de tudo', x: -44, z: -52, y: 1, region: 'shallows',
     color: 0xffc46b, lines: [
-      'A Listener. Wonderful. Last one we had went south to finish a song and came back as weather.',
-      'If you must go, ring the bells first. The Mutes hate a bell — it reminds them they used to have a voice.',
-      'And Aru — if you hear something singing your name, do not answer. That is how it gets in.',
+      'Uma Ouvinte. Maravilha. A última que tivemos foi para o sul terminar uma canção e voltou como tempo ruim.',
+      'Se você precisa ir, toque os sinos primeiro. Os Mudos odeiam sino — lembra que eles já tiveram voz.',
+      'E, Aru — se ouvir alguma coisa cantando o seu nome, não responda. É assim que ela entra.',
     ]},
-  { id: 'tol', name: 'Tol', role: 'Salvager of the Glass Reach', x: -204, z: -40, y: 2, region: 'glass',
+  { id: 'tol', name: 'Tol', role: 'Catador do Alcance de Vidro', x: -204, z: -40, y: 2, region: 'glass',
     color: 0xbfe0ff, lines: [
-      'Glass, glass, all glass. I sell the shards to rich people who want to be reminded how fragile things are.',
-      'The Reach sings if you stand still long enough. I have never had the patience. You look like you have too much.',
-      'Take the west path up. The Third Bell hangs in the shattered amphitheatre. The acoustics will do things to your bones.',
+      'Vidro, vidro, só vidro. Vendo os cacos para gente rica que quer lembrar como as coisas são frágeis.',
+      'O Alcance canta se você ficar parada o bastante. Nunca tive paciência. Você parece ter de sobra.',
+      'Pegue o caminho oeste. O Terceiro Sino está no anfiteatro em ruínas. A acústica faz coisas com os seus ossos.',
     ]},
-  { id: 'marrow', name: 'The Marrow Warden', role: 'What is left of the Second Cantor', x: 214, z: -66, y: 22, region: 'ossuary',
+  { id: 'marrow', name: 'O Guardião do Tutano', role: 'O que restou do Segundo Cantor', x: 214, z: -66, y: 22, region: 'ossuary',
     color: 0x9fe8d8, lines: [
-      'I was a singer. Now I am a room.',
-      'The bell you seek is in my heart. Take it. But leave me the echo — it is the last thing I own.',
-      'When you ring it, sing with it. A bell rung alone is just a noise.',
+      'Eu era cantor. Agora sou um cômodo.',
+      'O sino que você procura está no meu peito. Leve-o. Mas me deixe o eco — é a última coisa que possuo.',
+      'Quando tocar, cante junto. Sino tocado sozinho é só um barulho.',
     ]},
-  { id: 'orin', name: 'Orin', role: 'The Ninth Voice', x: 0, z: 274, y: 1, region: 'hollow',
+  { id: 'orin', name: 'Orin', role: 'A Nona Voz', x: 0, z: 274, y: 1, region: 'hollow',
     color: 0x9a8f86, lines: [
-      'You are late. Or early. Time is one of the things I stopped finishing.',
-      'I did not make the Hollow. I held it open. There is a difference, and it matters, and no one will believe me.',
-      'If you finish the Verse, I can rest. If you do not, I will keep holding it. I am good at holding things.',
+      'Você está atrasada. Ou adiantada. O tempo é uma das coisas que eu parei de terminar.',
+      'Eu não fiz o Oco. Eu o mantive aberto. Há uma diferença, e ela importa, e ninguém vai acreditar em mim.',
+      'Se você terminar o Verso, eu posso descansar. Se não, eu continuo segurando. Eu sou bom em segurar coisas.',
     ]},
 ];
 
@@ -444,11 +444,11 @@ export const NPCS = [
 // CREATURES — spawn zones and behaviour tuning
 // ---------------------------------------------------------------------------------------------
 export const CREATURE_TYPES = {
-  muteHound: { hp: 3, speed: 5.4, aggro: 26, name: 'Mute Hound', color: 0x8a8f96, glow: 0x5fd4c8 },
-  siltWraith: { hp: 4, speed: 2.5, aggro: 20, name: 'Silt Wraith', color: 0x6a7a80, glow: 0x9be0ff },
-  choirHusk: { hp: 7, speed: 2.1, aggro: 18, name: 'Choir Husk', color: 0x9a8a72, glow: 0xffc27a },
-  echoEater: { hp: 2, speed: 6.2, aggro: 34, name: 'Echo Eater', color: 0x4b5460, glow: 0xffe08a },
-  wanderer: { hp: 999, speed: 0.0, aggro: 0, name: 'The Kneeling One', color: 0x736a5c, glow: 0xd8b47a },
+  muteHound: { hp: 3, speed: 5.4, aggro: 26, name: 'Cão Mudo', color: 0x8a8f96, glow: 0x5fd4c8 },
+  siltWraith: { hp: 4, speed: 2.5, aggro: 20, name: 'Espectro de Lodo', color: 0x6a7a80, glow: 0x9be0ff },
+  choirHusk: { hp: 7, speed: 2.1, aggro: 18, name: 'Casca de Coro', color: 0x9a8a72, glow: 0xffc27a },
+  echoEater: { hp: 2, speed: 6.2, aggro: 34, name: 'Devorador de Ecos', color: 0x4b5460, glow: 0xffe08a },
+  wanderer: { hp: 999, speed: 0.0, aggro: 0, name: 'O Ajoelhado', color: 0x736a5c, glow: 0xd8b47a },
 };
 
 export const SPAWN_ZONES = [
