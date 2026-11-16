@@ -26,7 +26,7 @@ import { EffectsSystem } from './systems/effects.js';
 import { AudioSystem } from './systems/audio.js';
 import { SaveSystem } from './systems/save.js';
 import { HUD } from './ui/hud.js';
-import { OBJECTIVES, createQuestState, advanceObjective, INTRO_SCRIPT } from './narrative/quest.js';
+import { OBJECTIVES, createQuestState, INTRO_SCRIPT } from './narrative/quest.js';
 
 const boot = (pct, txt) => {
   try { window.__hud?.setBootProgress(pct, txt); } catch {}
@@ -662,39 +662,31 @@ class Game {
     this.audio.setDuck(open ? 0.3 : 1);
   }
 
+  /**
+   * Advance the objective chain. Objectives complete strictly in order; each is
+   * checked by one small predicate. The loop guards against multiple objectives
+   * completing in a single frame (e.g. loading a save that satisfies several).
+   */
   advanceObjectives() {
-    const before = this.campaign.objectiveIndex;
-    // evaluate all objective conditions in order
-    for (let guard = 0; guard < 10; guard++) {
-      const prev = this.campaign.objectiveIndex;
-      advanceObjective(
-        { objectiveIndex: this.campaign.objectiveIndex },
-        this.campaign,
-        (next) => {
-          this.campaign.objectiveIndex++;
-          if (next) this.hud.toast({ icon: '◎', title: 'New objective', text: next.title });
-        },
-      );
-      // manual checks (the pure function returns nothing, so re-evaluate here)
-      const idx = this.campaign.objectiveIndex;
-      const cur = OBJECTIVES[idx];
+    const f = this.campaign.flags;
+    const conditions = {
+      wake: () => this.campaign.shrines.includes('shrine_ashbend') && !!f.talkedSenn,
+      descend: () => !!f.leftAshbend,
+      find_wren: () => !!f.talkedWren,
+      ring_bells: () => this.campaign.bells.length >= 3,
+      reach_hollow: () => !!f.enteredHollow,
+      meet_orin: () => !!f.talkedOrin,
+      decide: () => !!this.campaign.ending,
+    };
+
+    for (let guard = 0; guard < OBJECTIVES.length; guard++) {
+      const cur = OBJECTIVES[this.campaign.objectiveIndex];
       if (!cur) break;
-      let done = false;
-      const f = this.campaign.flags;
-      switch (cur.id) {
-        case 'wake': done = this.campaign.shrines.includes('shrine_ashbend') && f.talkedSenn; break;
-        case 'descend': done = f.leftAshbend; break;
-        case 'find_wren': done = f.talkedWren; break;
-        case 'ring_bells': done = this.campaign.bells.length >= 3; break;
-        case 'reach_hollow': done = f.enteredHollow; break;
-        case 'meet_orin': done = f.talkedOrin; break;
-        case 'decide': done = !!this.campaign.ending; break;
-        default: done = false;
-      }
-      if (!done) break;
+      const check = conditions[cur.id];
+      if (!check || !check()) break;
       this.campaign.objectiveIndex++;
-      const nxt = OBJECTIVES[this.campaign.objectiveIndex];
-      if (nxt) this.hud.toast({ icon: '◎', title: 'New objective', text: nxt.title });
+      const next = OBJECTIVES[this.campaign.objectiveIndex];
+      if (next) this.hud.toast({ icon: '◎', title: 'New objective', text: next.title });
     }
   }
 

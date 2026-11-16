@@ -599,16 +599,17 @@ export class HUD {
     $('dialogue')?.classList.add('show');
     this.game.setDialogueOpen(true);
     this._dlgHandler = (e) => {
-      if (e.type === 'keydown' && !['Space', 'Enter', 'KeyE'].includes(e.code)) return;
+      if (!['Space', 'Enter', 'KeyE'].includes(e.code)) return;
       e.preventDefault();
       this.advanceDialogue();
     };
-    document.addEventListener('pointerdown', (e) => {
-      // ignore taps on choice buttons
-      if (e.target.closest('.dialogue-choice')) return;
+    this._dlgPointer = (e) => {
+      // ignore taps on choice buttons, which handle themselves
+      if (e.target && e.target.closest && e.target.closest('.dialogue-choice')) return;
       this.advanceDialogue();
-    }, { once: false });
+    };
     window.addEventListener('keydown', this._dlgHandler);
+    document.addEventListener('pointerdown', this._dlgPointer);
   }
 
   _showDialogueNode() {
@@ -702,6 +703,9 @@ export class HUD {
     this.dialog = null;
     $('dialogue')?.classList.remove('show');
     window.removeEventListener('keydown', this._dlgHandler);
+    if (this._dlgPointer) document.removeEventListener('pointerdown', this._dlgPointer);
+    this._dlgHandler = null;
+    this._dlgPointer = null;
     this.game.setDialogueOpen(false);
     st.onComplete?.();
   }

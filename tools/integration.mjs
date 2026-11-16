@@ -409,6 +409,14 @@ if (!game) {
       if (choices.length) { choices[0].dispatchEvent(new window.Event('click', { bubbles: true })); await sleep(20); }
     }
     ok('dialogue tree can be traversed to the end');
+
+    // Regression: every dialogue open used to add a document-level pointerdown
+    // listener that was never removed, so taps double-advanced later on.
+    game.hud.endDialogue();
+    game.hud.startDialogue('senn_intro', () => {});
+    game.hud.endDialogue();
+    if (!game.hud._dlgPointer && !game.hud._dlgHandler) ok('dialogue listeners are released');
+    else fail('dialogue listeners released', 'handler survived endDialogue');
   } catch (e) { fail('dialogue traversal', e); }
 
   // ---------- objectives + ending

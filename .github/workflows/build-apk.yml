@@ -1,0 +1,84 @@
+name: Build Android APK
+
+# Builds an installable APK from the web game using Capacitor.
+# GitHub's runners have the Android SDK pre-installed — no local setup needed.
+# Download it from the run's "Artifacts" section, or from Releases when you push a v* tag.
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-apk:
+    name: Build APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build the web game
+        run: npm run build
+
+      - name: Add the Android platform
+        run: |
+          npm install --no-save @capacitor/android@^8 @capacitor/cli@^8
+          npx cap add android
+          npx cap sync android
+
+      - name: Lock the activity to landscape
+        run: |
+          MANIFEST=android/app/src/main/AndroidManifest.xml
+          sed -i 's/android:screenOrientation="[^"]*"//g' "$MANIFEST"
+          sed -i 's|<activity|<activity android:screenOrientation="sensorLandscape"|' "$MANIFEST"
+
+      - name: Build debug APK
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon --stacktrace
+
+      - name: Name the artifact
+        run: |
+          mkdir -p out
+          cp android/app/build/outputs/apk/debug/app-debug.apk "out/yshmara-hollow-hymn.apk"
+          ls -lh out/
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: yshmara-apk
+          path: out/yshmara-hollow-hymn.apk
+          if-no-files-found: error
+          retention-days: 90
+
+      - name: Attach APK to release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: out/yshmara-hollow-hymn.apk
+          generate_release_notes: true
