@@ -1,0 +1,33 @@
+{
+  "name": "ysmaras-echo",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview --host 0.0.0.0",
+    "test": "node tools/check-imports.mjs && node tools/smoke.mjs && node tools/integration.mjs && node tools/check-offline.mjs",
+    "test:imports": "node tools/check-imports.mjs",
+    "test:smoke": "node tools/smoke.mjs",
+    "test:integration": "node tools/integration.mjs",
+    "shots": "node tools/scene-render.mjs",
+    "icons": "node tools/gen-icons.mjs",
+    "android:add": "npm run build && npx cap add android",
+    "android:sync": "npm run build && npx cap sync android",
+    "android:open": "npx cap open android",
+    "android:apk": "npm run build && npx cap sync android && cd android && ./gradlew assembleDebug",
+    "test:offline": "node tools/check-offline.mjs"
+  },
+  "dependencies": {
+    "three": "0.187.0"
+  },
+  "devDependencies": {
+    "@shaderfrog/glsl-parser": "^7.0.1",
+    "@sparticuz/chromium": "153.0.0",
+    "jsdom": "^31.0.1",
+    "puppeteer-core": "25.17.0",
+    "vite": "8.3.8"
+  },
+  "description": "Y'SMARA — The Hollow Hymn. An original offline 3D action-adventure for mobile and desktop."
+}
