@@ -118,9 +118,13 @@ export function terrainHeight(x, z) {
   const glassMask = smoothstep(190, 100, dGlass);
   // Broad, slow swells (a dry lake bed), plus a raised shoulder at the rim so the
   // Reach has a horizon instead of dissolving into pale sky.
-  const glassFlat = 0.30 + fbm(n2, x * 0.006, z * 0.006, 3) * 0.55
-    + fbm(nDetail, x * 0.028, z * 0.028, 2) * 0.26
-    + smoothstep(150, 205, dGlass) * 3.4;
+  // The Reach sat at ~0.2 m, a hair above the waterline: a blank white plain where
+  // the shard forest drowned and the horizon flattened. Lift it into a proper shelf
+  // with ridges so the shards stand against sky.
+  const glassFlat = 1.45 + fbm(n2, x * 0.006, z * 0.006, 3) * 1.15
+    + fbm(nDetail, x * 0.028, z * 0.028, 2) * 0.34
+    + smoothstep(150, 205, dGlass) * 4.2
+    + fbm(n2, x * 0.014 + 11, z * 0.014 - 7, 2) * 1.5;   // shallow dunes: the Reach must not read flat
   h = lerp(h, glassFlat, glassMask * 0.93);
 
   // --- HOLLOW: a bowl that swallows its own edge; the maw descends at its heart
