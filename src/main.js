@@ -938,6 +938,7 @@ class Game {
       cam.fov = 58;
       cam.updateProjectionMatrix();
       this.sky.followPlayer({ x: 0, y: 0, z: -300 }, dt, this.clock);
+      this.sky.followCamera(this.stage.camera);
       this.sky.applyLook(this.regionLook('kneeling', 0.35));
       this.terrain.userData.update(this.clock);
       this.water.userData.update(this.clock);
@@ -1050,6 +1051,7 @@ class Game {
 
     // ---- world animation
     this.sky.followPlayer(this.player.pos, dt, this.clock);
+    this.sky.followCamera(this.stage.camera);
     const reg = regionAt(this.player.pos.x, this.player.pos.z);
     this.currentRegion = reg;
     this.sky.applyLook(this.regionLook(reg.id, this.hymn.charge));

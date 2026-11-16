@@ -24,9 +24,19 @@ function sculpt(geo, amount = 0.06, freq = 0.35, seedOffset = 0) {
   return geo;
 }
 
-function stoneMaterial(set, color = 0xffffff, rough = 0.92) {
+function stoneMaterial(set, color = 0xffffff, rough = 0.92, uvScale = 0.42) {
+  // Clone the maps so each structure can choose its own real-world tiling.
+  // The canvas textures ship un-tiled (repeat 1) so nothing is locked in globally.
+  const map = set.map ? set.map.clone() : null;
+  const normalMap = set.normalMap ? set.normalMap.clone() : null;
+  for (const t of [map, normalMap]) {
+    if (!t) continue;
+    t.wrapS = t.wrapT = THREE.RepeatWrapping;
+    t.repeat.set(uvScale, uvScale);
+    t.needsUpdate = true;
+  }
   return new THREE.MeshStandardMaterial({
-    map: set.map, normalMap: set.normalMap, color,
+    map, normalMap, color,
     normalScale: new THREE.Vector2(1.4, 1.4), roughness: rough, metalness: 0.02,
   });
 }
@@ -38,95 +48,137 @@ export function buildTitan(preset) {
   const group = new THREE.Group();
   group.name = 'titan';
   const stone = stoneTextures();
-  const bodyMat = stoneMaterial(stone, 0x9c9080, 0.95);
-  bodyMat.normalScale.set(2.2, 2.2);
-  const mossMat = new THREE.MeshStandardMaterial({ color: 0x5f6f4a, roughness: 1, metalness: 0 });
-  const glowMat = new THREE.MeshBasicMaterial({ color: 0xffd79a, transparent: true, opacity: 0.85 });
+  const bodyMat = stoneMaterial(stone, 0x8e8375, 0.96);
+  bodyMat.normalScale.set(2.4, 2.4);
+  const mossMat = new THREE.MeshStandardMaterial({ color: 0x53603f, roughness: 1, metalness: 0 });
   const T = STRUCTURES.titan;
 
-  const addPart = (geo, mat, pos, rot, name) => {
+  const addPart = (geo, mat, pos, rot, name, cast = true) => {
     const m = new THREE.Mesh(geo, mat);
     m.position.set(pos.x, pos.y, pos.z);
     if (rot) m.rotation.set(rot.x || 0, rot.y || 0, rot.z || 0);
-    m.castShadow = preset.shadows;
+    m.castShadow = cast && preset.shadows;
     m.receiveShadow = preset.shadows;
     if (name) m.name = name;
     group.add(m);
     return m;
   };
 
-  // Torso: a huge tapered slab, sculpted
-  const torsoGeo = sculpt(new THREE.BoxGeometry(34, 30, 22, 14, 12, 9), 1.5, 0.06, 1.1);
-  addPart(torsoGeo, bodyMat, { x: 0, y: 52, z: -326 }, { x: 0.05 }, 'torso');
+  // ============================================================================
+  // THE KNEELING ONE — read as ONE figure: broad shoulders, bowed head, arms
+  // braced on the sea floor, one knee raised. Built from a continuous stack of
+  // sculpted slabs rather than loose spheres.
+  // ============================================================================
 
-  // Chest ridges (ribs carved into the stone) — thin sculpted slabs
-  for (let i = 0; i < 5; i++) {
-    const w = 26 - i * 2.4;
-    const geo = sculpt(new THREE.BoxGeometry(w, 1.5, 3.4, 10, 2, 2), 0.28, 0.4, i * 3.1);
-    addPart(geo, bodyMat, { x: 0, y: 44 + i * 3.4, z: -313 }, null, 'rib' + i);
+  // ---- PLINTH / LOWER BODY: the mass that the sea drowned
+  const baseGeo = sculpt(new THREE.CylinderGeometry(30, 40, 16, 14, 4), 1.6, 0.05, 2.2);
+  baseGeo.scale(1, 1, 0.78);
+  addPart(baseGeo, bodyMat, { x: 0, y: 8, z: -330 }, { x: 0.04 }, 'kneel_base');
+
+  // thighs: massive wedges running forward from the hips (kneeling = femurs down)
+  for (const [sx, rz] of [[16, -0.12], [-16, 0.12]]) {
+    const thigh = sculpt(new THREE.BoxGeometry(20, 13, 34, 8, 5, 10), 0.9, 0.08, sx);
+    addPart(thigh, bodyMat, { x: sx, y: 13, z: -300 }, { x: 0.10, z: rz }, 'thigh');
+    // knee caps — the two rounded forms breaking the waterline
+    const knee = sculpt(new THREE.SphereGeometry(10.5, 18, 14), 0.7, 0.2, sx + 20);
+    knee.scale(1.0, 0.82, 1.1);
+    addPart(knee, bodyMat, { x: sx, y: 12, z: -282 }, null, 'knee');
+    // shins trailing back into the silt
+    const shin = sculpt(new THREE.CylinderGeometry(8.4, 11, 22, 10, 4), 0.7, 0.1, sx + 30);
+    addPart(shin, bodyMat, { x: sx * 1.06, y: 6.5, z: -266 }, { x: 1.42 }, 'shin');
   }
 
-  // Head: a great carved ovoid, tilted down in prayer
-  const headGeo = sculpt(new THREE.SphereGeometry(13.5, 28, 22), 0.55, 0.18, 7.7);
-  headGeo.scale(1.0, 1.16, 1.05);
-  addPart(headGeo, bodyMat, { x: 0, y: 83, z: -335 }, { x: 0.38 }, 'head');
+  // ---- HIPS + TORSO: a single continuous mass, tapering up, leaning forward
+  const torsoGeo = sculpt(new THREE.CylinderGeometry(19, 27, 46, 14, 10), 1.35, 0.055, 5.5);
+  const tp = torsoGeo.attributes.position;
+  for (let i = 0; i < tp.count; i++) {
+    const y = tp.getY(i);
+    const t = (y + 23) / 46;                    // 0 bottom .. 1 top
+    const chest = 1 + Math.sin(t * Math.PI * 0.92) * 0.20;  // barrel chest
+    tp.setXYZ(i, tp.getX(i) * chest, y, tp.getZ(i) * chest * 0.74);
+  }
+  torsoGeo.computeVertexNormals();
+  addPart(torsoGeo, bodyMat, { x: 0, y: 62, z: -328 }, { x: 0.20 }, 'torso');
 
-  // Brow ridge + closed eye sockets (sung into the stone)
-  const brow = sculpt(new THREE.BoxGeometry(22, 2.6, 4.2, 10, 2, 2), 0.22, 0.5, 2.2);
-  addPart(brow, bodyMat, { x: 0, y: 87.5, z: -324.5 }, { x: 0.12 }, 'brow');
-  for (const sx of [-5.2, 5.2]) {
-    const eye = new THREE.Mesh(new THREE.SphereGeometry(1.9, 12, 10), new THREE.MeshStandardMaterial({ color: 0x2a2723, roughness: 1 }));
-    eye.position.set(sx, 84.4, -325.6);
-    group.add(eye);
+  // ---- SHOULDER SHELF: the wide slab Ashbend is built on
+  const shelf = sculpt(new THREE.CylinderGeometry(25, 23, 6.5, 12, 3), 0.7, 0.07, 9.1);
+  shelf.scale(1.12, 1, 0.86);
+  addPart(shelf, bodyMat, { x: 0, y: 46, z: -318 }, { x: 0.06 }, 'shoulder_shelf');
+
+  // deltoid masses framing the shelf
+  for (const [sx, sd] of [[25, 11], [-25, 12]]) {
+    const sh = sculpt(new THREE.SphereGeometry(11.5, 20, 15), 0.8, 0.19, sd);
+    sh.scale(1.25, 0.92, 1.05);
+    addPart(sh, bodyMat, { x: sx, y: 51, z: -320 }, null, 'shoulder');
   }
 
-  // Neck
-  const neckGeo = sculpt(new THREE.CylinderGeometry(8.4, 9.6, 13, 18, 6), 0.5, 0.22, 3.3);
-  addPart(neckGeo, bodyMat, { x: 0, y: 71, z: -330 }, { x: 0.16 }, 'neck');
+  // ---- NECK + BOWED HEAD
+  const neckGeo = sculpt(new THREE.CylinderGeometry(9.2, 11.5, 15, 12, 4), 0.55, 0.2, 3.3);
+  addPart(neckGeo, bodyMat, { x: 0, y: 78, z: -334 }, { x: 0.20 }, 'neck');
 
-  // Shoulders (rounded boulders) — the east one carries Ashbend
-  for (const [sx, nm] of [[24, 'shoulderE'], [-24, 'shoulderW']]) {
-    const g = sculpt(new THREE.SphereGeometry(12.5, 22, 16), 0.85, 0.18, sx > 0 ? 5 : 6);
-    g.scale(1.18, 0.86, 1.1);
-    addPart(g, bodyMat, { x: sx, y: 46.5, z: -318 }, null, nm);
+  const headGeo = sculpt(new THREE.SphereGeometry(14, 30, 24), 0.62, 0.14, 7.7);
+  headGeo.scale(0.94, 1.18, 1.02);
+  const head = addPart(headGeo, bodyMat, { x: 0, y: 92, z: -338 }, { x: 0.42 }, 'head');
+
+  // brow ridge: a heavy shelf over the eyes (reading as a face, not a rock)
+  const brow = sculpt(new THREE.BoxGeometry(21, 2.6, 5.2, 10, 2, 2), 0.2, 0.45, 2.2);
+  addPart(brow, bodyMat, { x: 0, y: 96.5, z: -328.5 }, { x: 0.30 }, 'brow');
+  // cheek planes
+  for (const sx of [-6.4, 6.4]) {
+    const cheek = sculpt(new THREE.SphereGeometry(5.0, 12, 9), 0.18, 0.3, sx);
+    cheek.scale(1.0, 0.72, 0.8);
+    addPart(cheek, bodyMat, { x: sx, y: 91.2, z: -326.6 }, { x: 0.3 }, 'cheek');
+  }
+  // eye sockets: deep dark recesses, closed in prayer
+  const socketMat = new THREE.MeshStandardMaterial({ color: 0x1d1b18, roughness: 1 });
+  for (const sx of [-5.4, 5.4]) {
+    const socket = new THREE.Mesh(new THREE.SphereGeometry(2.5, 12, 10), socketMat);
+    socket.position.set(sx, 94.4, -327.4);
+    socket.scale.set(1.25, 0.7, 0.55);
+    group.add(socket);
+  }
+  // jaw / chin
+  const jaw = sculpt(new THREE.BoxGeometry(13, 5.2, 9, 7, 3, 4), 0.28, 0.3, 4.1);
+  addPart(jaw, bodyMat, { x: 0, y: 85.6, z: -327.6 }, { x: 0.42 }, 'jaw');
+
+  // ---- ARMS: upper arm out of the deltoid, elbow bent down, forearm braced on the ground
+  for (const [sx, sd] of [[40, 31], [-40, 32]]) {
+    const upper = sculpt(new THREE.CylinderGeometry(7.4, 8.6, 26, 12, 6), 0.6, 0.12, sd);
+    addPart(upper, bodyMat, { x: sx, y: 32, z: -308 }, { x: 0.16, z: sx > 0 ? -0.20 : 0.20 }, 'upperarm');
+    const elbore = sculpt(new THREE.SphereGeometry(7.8, 14, 11), 0.4, 0.2, sd + 5);
+    addPart(elbore, bodyMat, { x: sx * 1.06, y: 19.5, z: -296 }, null, 'elbow');
+    const fore = sculpt(new THREE.CylinderGeometry(6.6, 5.6, 22, 10, 5), 0.5, 0.13, sd + 9);
+    addPart(fore, bodyMat, { x: sx * 1.10, y: 10.5, z: -283 }, { x: -0.62 }, 'forearm');
   }
 
-  // Arms sweeping down into the ash, forearms resting on the ground
-  for (const [sx, yaw, nm] of [[37, -0.22, 'armE'], [-37, 0.22, 'armW']]) {
-    const g = sculpt(new THREE.CylinderGeometry(6.2, 7.4, 30, 16, 10), 0.7, 0.13, sx > 0 ? 9 : 11);
-    const m = addPart(g, bodyMat, { x: sx, y: 30, z: -298 }, { x: 0.3, z: yaw }, nm);
-    m.rotation.order = 'ZXY';
-  }
-  // Hands (boulder palms) + splayed stone fingers
-  for (const [hx, hz, nm] of [[45, -274, 'handE'], [-45, -270, 'handW']]) {
-    const palm = sculpt(new THREE.SphereGeometry(7.6, 18, 14), 0.7, 0.22, hx > 0 ? 12 : 13);
-    palm.scale(1.1, 0.72, 1.25);
-    addPart(palm, bodyMat, { x: hx, y: 15.2, z: hz }, null, nm);
+  // ---- HANDS: flat palms with splayed stone fingers, pressed into the shallows
+  for (const [hx, hz, sd] of [[46, -272, 40], [-46, -268, 41]]) {
+    const palm = sculpt(new THREE.BoxGeometry(13, 3.4, 15, 6, 2, 6), 0.32, 0.28, sd);
+    addPart(palm, bodyMat, { x: hx, y: 2.4, z: hz }, { x: 0.03 }, 'palm');
     for (let f = 0; f < 4; f++) {
-      const fg = sculpt(new THREE.CylinderGeometry(0.95, 1.25, 9, 8, 4), 0.24, 0.4, f * 2.7);
-      const ang = (f - 1.5) * 0.34;
-      addPart(fg, bodyMat, { x: hx + Math.sin(ang) * 5.4, y: 14.4, z: hz - 5.2 - Math.cos(ang) * 1.6 }, { x: 1.24, z: ang * 0.5 }, 'finger');
+      const fg = sculpt(new THREE.CylinderGeometry(1.15, 1.5, 8.5, 7, 3), 0.2, 0.35, f * 2.7 + sd);
+      const ang = (f - 1.5) * 0.30;
+      addPart(fg, bodyMat, { x: hx + Math.sin(ang) * 6.6, y: 1.7, z: hz - 9.5 + Math.abs(ang) * 2.0 },
+        { x: 1.46, z: ang * 0.6 }, 'finger');
     }
-  }
-  // Knees rising from the sea
-  for (const [kx, kz, nm] of [[21, -263, 'kneeE'], [-21, -263, 'kneeW']]) {
-    const g = sculpt(new THREE.SphereGeometry(10.2, 20, 14), 0.8, 0.2, kx > 0 ? 15 : 16);
-    g.scale(1.0, 0.9, 1.2);
-    addPart(g, bodyMat, { x: kx, y: 8.5, z: kz }, null, nm);
-    // draped cloth / shin slabs
-    const shin = sculpt(new THREE.BoxGeometry(13, 6, 26, 8, 4, 10), 0.5, 0.14, kx);
-    addPart(shin, bodyMat, { x: kx * 1.05, y: 4.5, z: kz - 14 }, { x: -0.05 }, 'shin');
+    // thumb
+    const th = sculpt(new THREE.CylinderGeometry(1.3, 1.7, 7, 7, 3), 0.2, 0.35, sd + 3);
+    addPart(th, bodyMat, { x: hx + (hx > 0 ? 7.4 : -7.4), y: 1.9, z: hz + 2.2 }, { x: 0.5, z: hx > 0 ? 0.7 : -0.7 }, 'thumb');
   }
 
-  // Moss / lichen mats on upward faces — reads as centuries of weather
+  // ---- CARVED MANTLE: shoulder cloth in stone, with a deep carved fold line
+  const mantle = sculpt(new THREE.CylinderGeometry(21, 30, 17, 13, 4), 0.85, 0.09, 6.3);
+  mantle.scale(1.06, 1, 0.9);
+  addPart(mantle, bodyMat, { x: 0, y: 42, z: -322 }, { x: 0.05 }, 'mantle');
+
+  // ---- MOSS / LICHEN on upward faces (weathering)
   const mossRng = makeRng(77);
-  for (let i = 0; i < 26; i++) {
+  for (let i = 0; i < 34; i++) {
     const a = mossRng() * TAU;
-    const r = 8 + mossRng() * 26;
-    const mx = Math.cos(a) * r, mz = -320 + Math.sin(a) * r * 0.7;
-    const my = 46 + mossRng() * 40;
-    if (my > 78) continue;
-    const g = new THREE.CircleGeometry(1.6 + mossRng() * 4.2, 8);
+    const r = 6 + mossRng() * 30;
+    const mx = Math.cos(a) * r, mz = -324 + Math.sin(a) * r * 0.72;
+    const my = mossRng() < 0.5 ? 47.5 : 52 + mossRng() * 36;
+    const g = new THREE.CircleGeometry(1.4 + mossRng() * 3.6, 7);
     g.rotateX(-Math.PI / 2);
     const m = new THREE.Mesh(g, mossMat);
     m.position.set(mx, my, mz);
@@ -135,39 +187,40 @@ export function buildTitan(preset) {
     group.add(m);
   }
 
-  // Glowing "sigil" runes carved along the collarbone and brow — the titan is still listening
+  // ---- SIGILS: warm carvings along the collarbone and brow, the titan is still listening
   const sigils = new THREE.Group();
   const glowTex = glowTexture();
   const sigilPositions = [
-    [-11, 56.5, -313.6], [-5.5, 57.4, -313.6], [0, 57.8, -313.6], [5.5, 57.4, -313.6], [11, 56.5, -313.6],
-    [-8, 90.5, -326.2], [0, 91.2, -326.2], [8, 90.5, -326.2],
+    [-13, 57.5, -309.5], [-6.5, 58.4, -309.8], [0, 58.8, -310.0], [6.5, 58.4, -309.8], [13, 57.5, -309.5],
+    [-9, 100.0, -329.5], [0, 100.8, -329.8], [9, 100.0, -329.5],
   ];
   for (const [sx, sy, sz] of sigilPositions) {
     const s = new THREE.Sprite(new THREE.SpriteMaterial({
-      map: glowTex, color: 0xffcb84, transparent: true, opacity: 0.75,
+      map: glowTex, color: 0xffcb84, transparent: true, opacity: 0.7,
       blending: THREE.AdditiveBlending, depthWrite: false,
     }));
     s.position.set(sx, sy, sz);
-    s.scale.set(2.2, 2.2, 1);
+    s.scale.set(2.4, 2.4, 1);
     sigils.add(s);
   }
   group.add(sigils);
 
-  // A single warm point light at the titan's heart, so it reads at dusk
-  const heart = new THREE.PointLight(0xffb870, 3.2, 90, 2);
-  heart.position.set(0, 44, -310);
-  if (preset.shadows && preset.quality === 'ultra') heart.castShadow = true;
+  const heart = new THREE.PointLight(0xffb870, 2.6, 80, 2);
+  heart.position.set(0, 62, -306);
   group.add(heart);
 
   group.userData.sigils = sigils;
   group.userData.heart = heart;
+  group.userData.head = head;
   group.userData.update = (t) => {
     const pulse = 0.55 + Math.sin(t * 0.7) * 0.16;
     sigils.children.forEach((s, i) => {
       s.material.opacity = pulse * (0.7 + Math.sin(t * 1.6 + i * 0.9) * 0.3);
       s.scale.setScalar(2.0 + Math.sin(t * 1.1 + i) * 0.35);
     });
-    heart.intensity = 2.6 + Math.sin(t * 0.8) * 0.7;
+    heart.intensity = 2.2 + Math.sin(t * 0.8) * 0.6;
+    // the head bows almost imperceptibly, as if still praying
+    head.rotation.x = 0.42 + Math.sin(t * 0.22) * 0.012;
   };
   return group;
 }

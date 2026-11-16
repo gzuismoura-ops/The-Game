@@ -201,7 +201,7 @@ export class FloraSystem {
         color: 0x9fe8d8, roughness: 0.5, metalness: 0.1, transparent: true, opacity: 0.78,
         side: THREE.DoubleSide, emissive: 0x1d5750, emissiveIntensity: 0.55,
       });
-      const g = withWindAttrs(new THREE.CircleGeometry(1.2, 9, 0, Math.PI), 6);
+      const g = withWindAttrs(new THREE.CircleGeometry(0.75, 9, 0, Math.PI), 6);
       const list = sample(props.coralFan, density * 0.85);
       const m = instanced(g, fanMat, list, this.group, { name: 'coralFan' });
       if (m) {
@@ -228,13 +228,14 @@ export class FloraSystem {
         map: stoneSet.map, normalMap: stoneSet.normalMap, color: 0x9a958a,
         roughness: 0.95, metalness: 0.01, flatShading: true,
       });
-      const g = new THREE.DodecahedronGeometry(1.0, 1);
+      const g = new THREE.DodecahedronGeometry(0.52, 0);
       const noise = makeNoise2D(123);
       const pos = g.attributes.position;
       for (let i = 0; i < pos.count; i++) {
         const x = pos.getX(i), y = pos.getY(i), z = pos.getZ(i);
-        const d = 1 + noise(x * 1.6, y * 1.4 + z * 1.1) * 0.34;
-        pos.setXYZ(i, x * d * 1.15, y * d * 0.78, z * d);
+        const d = 1 + noise(x * 2.6, y * 2.2 + z * 1.8) * 0.42;
+        // stones lie low: wide and flat, never a smooth grey dome
+        pos.setXYZ(i, x * d * 1.28, y * d * 0.52, z * d * 1.1);
       }
       g.computeVertexNormals();
       const list = sample(props.rock, density);

@@ -27,35 +27,35 @@ export const REGIONS = [
     id: 'kneeling', name: 'The Kneeling One', short: 'Ashbend',
     center: { x: 0, z: -300 }, radius: 105,
     ambience: 'wind_high', scale: 'dorian', root: 146.83, mood: 0.35,
-    palette: { ground: 0x6d6252, accent: 0xd8b47a, fog: 0xc9b79a, sky: 0x8fa8bd, water: 0x2f4f57 },
+    palette: { ground: 0x6e6150, accent: 0xd8a862, fog: 0x9a8d78, sky: 0x7f9cb4, water: 0x24383e },
     blurb: 'A god of stone, kneeling so long the world grew over it. Ashbend village rides its shoulders.',
   },
   {
     id: 'shallows', name: 'The Silt Shallows', short: 'Shallows',
     center: { x: 0, z: -40 }, radius: 190,
     ambience: 'water_lap', scale: 'aeolian', root: 130.81, mood: 0.5,
-    palette: { ground: 0x8c8168, accent: 0xe8d9b0, fog: 0xd9c9a8, sky: 0x9fb6c4, water: 0x3f5f63 },
+    palette: { ground: 0x7d6d4a, accent: 0xc9a978, fog: 0xb0a184, sky: 0x8fa9bc, water: 0x2b3f44 },
     blurb: 'A mirror one finger deep. The sky walks there, and so do the Mutes.',
   },
   {
     id: 'ossuary', name: 'The Coral Ossuary', short: 'Ossuary',
     center: { x: 196, z: -30 }, radius: 150,
     ambience: 'cave_drip', scale: 'phrygian', root: 123.47, mood: 0.65,
-    palette: { ground: 0x7e6a63, accent: 0x9fe8d8, fog: 0x6e7f86, sky: 0x6d8792, water: 0x24464b },
+    palette: { ground: 0x5f4c47, accent: 0x6fc4b2, fog: 0x6b7a7e, sky: 0x6a8492, water: 0x182f35 },
     blurb: 'The ribs of a Cantor that sang itself to death. Something still hums in the marrow.',
   },
   {
     id: 'glass', name: 'The Glass Reach', short: 'Glass',
     center: { x: -206, z: -20 }, radius: 148,
     ambience: 'wind_glass', scale: 'lydian', root: 155.56, mood: 0.45,
-    palette: { ground: 0xa8a49a, accent: 0xcfe8f2, fog: 0xbfcbd4, sky: 0x86a3bb, water: 0x35505c },
+    palette: { ground: 0x7c848e, accent: 0xa8d6e4, fog: 0x97a6b0, sky: 0x7d99b2, water: 0x243c46 },
     blurb: 'A sea that forgot how to be water. Every shard remembers a different sunset.',
   },
   {
     id: 'hollow', name: 'The Hollow', short: 'Hollow',
     center: { x: 6, z: 268 }, radius: 132,
     ambience: 'silence', scale: 'locrian', root: 110.0, mood: 0.9,
-    palette: { ground: 0x4a4744, accent: 0x9a8f86, fog: 0x5a5854, sky: 0x4d5257, water: 0x1b2a2c },
+    palette: { ground: 0x2f2a2c, accent: 0x6e5c6c, fog: 0x46423f, sky: 0x3a3f45, water: 0x101b1f },
     blurb: 'Where the Ninth Verse stopped. Not empty — unfinished.',
   },
 ];
@@ -514,7 +514,7 @@ export function getProps() {
     const h = terrainHeight(x, z);
     if (h < 0.02 || h > 4.2) return null;
     if (pathDistance(x, z) < 1.6) return null;
-    return { scale: rngRange(rng, 0.6, 1.6) };
+    return { scale: rngRange(rng, 0.55, 1.25) };
   }));
   add('saltbush', scatter(102, 900, -H, H, -H, H, (x, z, rng) => {
     const reg = regionAt(x, z);
@@ -530,7 +530,7 @@ export function getProps() {
     const h = terrainHeight(x, z);
     if (h < -1.5 || h > 9) return null;
     if (pathDistance(x, z) < 2.5) return null;
-    return { scale: rngRange(rng, 0.8, 2.4) };
+    return { scale: rngRange(rng, 0.5, 1.5) };
   }));
   add('coralFan', scatter(104, 520, -H, H, -H, H, (x, z, rng) => {
     const reg = regionAt(x, z);
@@ -545,12 +545,12 @@ export function getProps() {
     const slope = slopeAt(x, z);
     if (slope < 0.18 && rng() > 0.25) return null;
     if (pathDistance(x, z) < 2.5) return null;
-    return { scale: rngRange(rng, 0.6, 2.8) };
+    return { scale: rngRange(rng, 0.35, 1.35) };
   }));
   add('glassShard', scatter(106, 420, -320, -90, -190, 150, (x, z, rng) => {
     if (regionAt(x, z).id !== 'glass') return null;
     if (slopeAt(x, z) > 0.4) return null;
-    return { scale: rngRange(rng, 1.0, 3.8) };
+    return { scale: rngRange(rng, 0.7, 2.4) };
   }));
   add('deadtree', scatter(107, 130, -H, H, -H, H, (x, z, rng) => {
     const reg = regionAt(x, z);
@@ -558,14 +558,14 @@ export function getProps() {
     const h = terrainHeight(x, z);
     if (h < 0.3 || h > 5.5) return null;
     if (pathDistance(x, z) < 3) return null;
-    return { scale: rngRange(rng, 0.8, 1.7) };
+    return { scale: rngRange(rng, 0.7, 1.4) };
   }));
   add('ashPillar', scatter(108, 120, -110, 130, 150, 330, (x, z, rng) => {
     if (regionAt(x, z).id !== 'hollow') return null;
     const h = terrainHeight(x, z);
     if (h < -1) return null;
     if (dist2d(x, z, 0, 274) < 16) return null;
-    return { scale: rngRange(rng, 1.2, 3.4) };
+    return { scale: rngRange(rng, 1.0, 2.6) };
   }));
   add('boneArch', scatter(109, 26, -H, H, -H, H, (x, z, rng) => {
     const reg = regionAt(x, z);

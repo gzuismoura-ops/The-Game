@@ -70,9 +70,10 @@ export const STRUCTURES = {
       { id: 'apse', type: 'box', x: 0, y: 34, z: -300, w: 26, h: 4, d: 20, rot: 0.02 }, // the shoulder shelf
     ],
     colliders: [
-      { shape: 'circle', x: 36, z: -300, r: 7.0 }, { shape: 'circle', x: -36, z: -296, r: 7.0 },
-      { shape: 'circle', x: 44, z: -276, r: 7.6 }, { shape: 'circle', x: -44, z: -272, r: 7.6 },
-      { shape: 'circle', x: 20, z: -262, r: 9.4 }, { shape: 'circle', x: -20, z: -262, r: 9.4 },
+      { shape: 'circle', x: 40, z: -308, r: 7.6 }, { shape: 'circle', x: -40, z: -306, r: 7.6 },
+      { shape: 'circle', x: 42, z: -296, r: 7.4 }, { shape: 'circle', x: -42, z: -294, r: 7.4 },
+      { shape: 'circle', x: 46, z: -274, r: 7.6 }, { shape: 'circle', x: -46, z: -270, r: 7.6 },
+      { shape: 'circle', x: 17, z: -283, r: 10.2 }, { shape: 'circle', x: -17, z: -283, r: 10.2 },
     ],
   },
 

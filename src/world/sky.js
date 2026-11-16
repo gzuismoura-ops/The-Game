@@ -95,7 +95,8 @@ export class SkySystem {
       uMood: { value: 0 },
       uCloudCover: { value: 0.85 },
     };
-    const geo = new THREE.SphereGeometry(600, 32, 20);
+    // Small dome, always recentred on the camera: never clipped, never left behind.
+    const geo = new THREE.SphereGeometry(1, 32, 20);
     this.mat = new THREE.ShaderMaterial({
       uniforms: this.uniforms, vertexShader: SKY_VERT, fragmentShader: SKY_FRAG,
       side: THREE.BackSide, depthWrite: false, depthTest: false, fog: false,
@@ -103,7 +104,9 @@ export class SkySystem {
     this.dome = new THREE.Mesh(geo, this.mat);
     this.dome.frustumCulled = false;
     this.dome.renderOrder = -10;
-    this.group.add(this.dome);
+    this.dome.scale.setScalar(400);
+    this.scene.add(this.dome);   // not in this.group: it is positioned per-frame from the camera
+
 
     // ---- lights
     this.sun = new THREE.DirectionalLight(0xfff0d8, 3.1);
@@ -221,6 +224,14 @@ export class SkySystem {
     }
     if (fogDensity !== undefined && this.scene.fog) this.scene.fog.density = fogDensity;
     this.sunDirNow = u.uSunDir.value.clone();
+  }
+
+  /** Sky is camera-anchored so it can never be escaped or clipped. */
+  followCamera(camera) {
+    if (!this.dome) return;
+    this.dome.position.copy(camera.position);
+    this.dome.scale.setScalar(Math.max(300, camera.far * 0.8));
+    this.dome.updateMatrixWorld();
   }
 
   /** Keep the shadow frustum, dome and motes glued to the player. */

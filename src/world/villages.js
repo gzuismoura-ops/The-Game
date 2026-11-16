@@ -11,15 +11,23 @@ export function buildVillages(preset) {
   group.name = 'villages';
   const wood = woodTextures();
   const stone = stoneTextures();
+  const woodTiled = (set, scale) => {
+    const c = (t) => (t ? (() => { const x = t.clone(); x.wrapS = x.wrapT = THREE.RepeatWrapping; x.repeat.set(scale, scale); x.needsUpdate = true; return x; })() : null);
+    return { map: c(set.map), normalMap: c(set.normalMap) };
+  };
+  // Decks are ~14 m across: 0.55 tiles/m gives planks a believable 1.8 m span.
+  const woodDeck = woodTiled(wood, 0.55);
+  const woodFine = woodTiled(wood, 2.2);
+  const stoneFine = woodTiled(stone, 1.1);
   const woodMat = new THREE.MeshStandardMaterial({
-    map: wood.map, normalMap: wood.normalMap, color: 0x9a8567, roughness: 0.88, metalness: 0.04,
+    map: woodDeck.map, normalMap: woodDeck.normalMap, color: 0x9a8567, roughness: 0.88, metalness: 0.04,
   });
   const roofMat = new THREE.MeshStandardMaterial({
-    map: wood.map, normalMap: wood.normalMap, color: 0x5a5548, roughness: 0.96,
+    map: woodFine.map, normalMap: woodFine.normalMap, color: 0x5a5548, roughness: 0.96,
   });
   const ropeMat = new THREE.MeshStandardMaterial({ color: 0x8a7856, roughness: 1 });
   const stoneMat = new THREE.MeshStandardMaterial({
-    map: stone.map, normalMap: stone.normalMap, color: 0x8d887c, roughness: 0.95,
+    map: stoneFine.map, normalMap: stoneFine.normalMap, color: 0x8d887c, roughness: 0.95,
   });
   const glowTex = glowTexture();
   const fireMat = new THREE.SpriteMaterial({

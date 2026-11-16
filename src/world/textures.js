@@ -73,18 +73,23 @@ export function sandTextures(size = 256) {
   const albedo = paint(size, (d, sz, px) => {
     for (let y = 0; y < sz; y++) for (let x = 0; x < sz; x++) {
       const u = x / sz, v = y / sz;
-      const ripple = Math.sin((u * 18 + Math.sin(v * 6.0) * 1.4) * Math.PI) * 0.5 + 0.5;
+      const ripple = Math.sin((u * 5.5 + Math.sin(v * 3.0) * 1.1) * Math.PI) * 0.5 + 0.5;
       const grain = n(x * 0.09, y * 0.09) * 0.5 + 0.5;
       const fleck = Math.pow(n2(x * 0.5, y * 0.5) * 0.5 + 0.5, 12);
-      const h = ripple * 0.35 + grain * 0.65;
+      const h = ripple * 0.22 + grain * 0.78;
       height[y * sz + x] = h + fleck * 0.6;
-      const base = 176 + grain * 26 + ripple * 12;
-      const shell = fleck > 0.35 ? 40 : 0;
+      // warm mineral silt, not beach-postcard white: deep value range with darker troughs
+      const base = 104 + grain * 44 + ripple * 22;
+      const trough = (1 - ripple) * 18;
+      const shell = fleck > 0.42 ? 52 : 0;
       const i = px(x, y);
-      d[i] = base + shell; d[i + 1] = base - 4 + shell; d[i + 2] = base - 26 + shell * 0.7; d[i + 3] = 255;
+      d[i] = base - trough + shell;
+      d[i + 1] = base - 10 - trough * 0.8 + shell * 0.94;
+      d[i + 2] = base - 30 - trough * 0.6 + shell * 0.78;
+      d[i + 3] = 255;
     }
   });
-  const out = { map: tex(albedo, 26), normalMap: tex(heightToNormal(height, size, 1.5), 26, false) };
+  const out = { map: tex(albedo, 1), normalMap: tex(heightToNormal(height, size, 1.5), 1, false) };
   cache.set(key, out);
   return out;
 }
@@ -104,13 +109,17 @@ export function stoneTextures(size = 256) {
       const blotch = n3(x * 0.02, y * 0.02) * 0.5 + 0.5;
       const h = strata * 0.4 + rough * 0.6;
       height[y * sz + x] = h * 2.2 + blotch * 2.5;
-      const base = 96 + rough * 34 + strata * 22;
-      const lichen = smoothstep(0.62, 0.82, blotch) * 26;
+      const base = 62 + rough * 30 + strata * 20;
+      const iron = smoothstep(0.55, 0.8, blotch) * 20;      // rust seams
+      const lichen = smoothstep(0.7, 0.9, blotch) * 22;     // green-grey growth
       const i = px(x, y);
-      d[i] = base + lichen * 0.5; d[i + 1] = base + lichen * 0.95; d[i + 2] = base + lichen * 0.45; d[i + 3] = 255;
+      d[i] = base + iron * 1.5 + lichen * 0.35;
+      d[i + 1] = base + iron * 0.75 + lichen * 0.85;
+      d[i + 2] = base + iron * 0.2 + lichen * 0.4;
+      d[i + 3] = 255;
     }
   });
-  const out = { map: tex(albedo, 14), normalMap: tex(heightToNormal(height, size, 1.1), 14, false) };
+  const out = { map: tex(albedo, 1), normalMap: tex(heightToNormal(height, size, 1.1), 1, false) };
   cache.set(key, out);
   return out;
 }
@@ -132,13 +141,18 @@ export function coralTextures(size = 256) {
       height[y * sz + x] = h;
       const i = px(x, y);
       const tint = n2(x * 0.03, y * 0.03) * 0.5 + 0.5;
-      d[i] = lerp(196, 168, tint) + pores * 22;
-      d[i + 1] = lerp(178, 196, tint) + pores * 16;
-      d[i + 2] = lerp(166, 186, tint) + pores * 18;
+      const hue = n2(x * 0.008 + 40, y * 0.008) * 0.5 + 0.5;   // large-scale colony colour drift
+      // rose -> ochre -> sea-green across the reef
+      const rr = lerp(lerp(142, 156, hue), 120, tint);
+      const gg = lerp(lerp(96, 128, hue), 112, tint);
+      const bb = lerp(lerp(92, 96, hue), 118, tint);
+      d[i] = rr + pores * 26;
+      d[i + 1] = gg + pores * 20;
+      d[i + 2] = bb + pores * 22;
       d[i + 3] = 255;
     }
   });
-  const out = { map: tex(albedo, 9), normalMap: tex(heightToNormal(height, size, 2.4), 9, false) };
+  const out = { map: tex(albedo, 1), normalMap: tex(heightToNormal(height, size, 2.4), 1, false) };
   cache.set(key, out);
   return out;
 }
@@ -206,7 +220,7 @@ export function glassTextures(size = 256) {
       d[i + 3] = 255;
     }
   });
-  const out = { map: tex(albedo, 12), normalMap: tex(heightToNormal(height, size, 2.6), 12, false) };
+  const out = { map: tex(albedo, 1), normalMap: tex(heightToNormal(height, size, 2.6), 1, false) };
   cache.set(key, out);
   return out;
 }
@@ -231,7 +245,7 @@ export function ashTextures(size = 256) {
       d[i] = base - crack * 26; d[i + 1] = base - crack * 28; d[i + 2] = base - crack * 26; d[i + 3] = 255;
     }
   });
-  const out = { map: tex(albedo, 18), normalMap: tex(heightToNormal(height, size, 2.0), 18, false) };
+  const out = { map: tex(albedo, 1), normalMap: tex(heightToNormal(height, size, 2.0), 1, false) };
   cache.set(key, out);
   return out;
 }

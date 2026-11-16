@@ -124,7 +124,7 @@ void main() {
   // macro breakup so large areas never look flat
   float macro = fbm2(worldUV * 0.012) * 0.22 + fbm2(worldUV * 0.06) * 0.10;
   albedo *= 0.86 + macro;
-  albedo = mix(albedo, vColor.rgb, 0.34);
+  albedo = mix(albedo, vColor.rgb * 1.12, 0.62);
 
   // ---- wetness band & tide staining
   float waterY = uWaterLevel;
