@@ -54,13 +54,36 @@ npm run preview
 
 ### Instalar como APK
 
-**O APK já está pronto:** [baixar yshmara-hollow-hymn.apk (5,1 MB)](https://github.com/gzuismoura-ops/The-Game/releases/download/v1.0.0/yshmara-hollow-hymn.apk)
+**O APK já está pronto:** [baixar yshmara-hollow-hymn.apk (5,1 MB · v1.0.1)](https://github.com/gzuismoura-ops/The-Game/releases/download/v1.0.1/yshmara-hollow-hymn.apk)
 
 No celular, abra o link, toque no arquivo baixado e permita "instalar de fonte desconhecida"
 quando o Android perguntar. Abra **Y'SMARA** na gaveta de apps.
 
 Para **gerar o seu próprio** APK do zero (sem instalar Android Studio), veja
 **[GUIA-GITHUB.md](GUIA-GITHUB.md)** — o passo a passo completo em GitHub Actions.
+
+### O que mudou na v1.0.1
+
+A v1.0.0 abria com uma tela quase preta. Eram duas falhas independentes:
+
+**O WebGL falhava sem saída.** Agora o jogo testa o alvo de renderização no aparelho e cai
+automaticamente para um caminho direto na tela. Se nem isso funcionar, aparece um aviso em
+português explicando o que houve, em vez de escuridão.
+
+**O mundo estava mal composto.** Mesmo desenhando, três lugares continuavam errados: a vila
+Kell ficava em mar aberto (com o chão abaixo da água, afogando a câmera), o Oco — onde o jogo
+termina — estava inteiro submerso, e a encosta do Titã tinha 61° de inclinação, o que fazia o
+jogador rastejar a 0,6 m/s e parecer travado. Os três foram refeitos.
+
+Junto disso, 12 ecos/cantos/NPCs ficaram com a altura desatualizada quando o terreno mudou, e o
+segredo "Jardim de Vidro" estava submerso e era inalcançável. Corrigidos.
+
+Todo o jogo foi traduzido para português do Brasil: menus, HUD, diálogos, 24 ecos, 8 cantos,
+5 segredos, 5 NPCs, 18 conquistas, os dois finais e os créditos.
+
+Dois testes novos impedem que esses problemas voltem: um exige que todo objeto esteja a menos
+de 6 m do solo, outro faz uma busca em largura a partir do ponto de partida usando o mesmo
+limite de inclinação do jogador, para provar que todo conteúdo é alcançável a pé.
 
 ---
 
@@ -239,7 +262,7 @@ shader do jogo**. As imagens em `screenshots/` saem desse pipeline (~0,3 s por f
   gramática, não por compilação de driver. Espere diferenças visuais pequenas entre os screenshots e
   o jogo rodando de verdade (AA, tone mapping, sombras suaves, bloom).
 - **O APK foi construído de verdade**, pelo GitHub Actions, e está publicado em
-  [Releases](https://github.com/gzuismoura-ops/The-Game/releases/latest) (5,1 MB).
+  [Releases](https://github.com/gzuismoura-ops/The-Game/releases/latest) (5,1 MB · v1.0.1).
   Todos os passos do build passaram: build web → `cap add android` → Gradle `assembleDebug` → upload.
   O que **não** foi feito foi **instalar e abrir** o APK num aparelho Android real (não há um aqui),
   então a instalação e o primeiro boot foram verificados pelo build, não em hardware.
