@@ -16,6 +16,7 @@ try { Object.defineProperty(globalThis, 'devicePixelRatio', { value: 1, configur
 
 const THREE = await import('three');
 const W = await import('../src/world/world.js');
+const { deckHeightAt } = await import('../src/world/structures.js');
 const { buildTerrain } = await import('../src/world/terrainMesh.js');
 const { buildTitan, buildShrine, buildMaw, buildAmphitheatre, buildBellChamber } = await import('../src/world/monuments.js');
 const { buildVillages } = await import('../src/world/villages.js');
@@ -229,7 +230,14 @@ function skyColor(dir, look) {
   return c;
 }
 
-function renderView({ name, pos, yaw, pitch, fov = 66, w = 400, h = 225, look }) {
+function renderView({ name, pos, eye = null, yaw, pitch, fov = 66, w = 400, h = 225, look }) {
+  // Only derive a height when the view did not supply one; a view that computed its own
+  // eye height (sy) already accounts for decks, and must not be forced onto bare terrain.
+  if (eye !== null) {
+    const g = deckHeightAt(pos.x, pos.z);
+    const t = heightAt(pos.x, pos.z);
+    pos = { x: pos.x, y: ((g !== null && g >= t - 0.6) ? g : t) + eye, z: pos.z };
+  }
   const dir0 = new THREE.Vector3(Math.sin(yaw) * Math.cos(pitch), Math.sin(pitch), Math.cos(yaw) * Math.cos(pitch)).normalize();
   const right = new THREE.Vector3().crossVectors(dir0, new THREE.Vector3(0, 1, 0)).normalize();
   const up = new THREE.Vector3().crossVectors(right, dir0).normalize();
@@ -450,11 +458,40 @@ for (const [k, v] of Object.entries(REGION_FOG)) {
 }
 // hex() already yields 0-1 floats; nothing to rescale here.
 
-const sy = (x, z, e = 1.7) => W.terrainHeight(x, z) + e;
-const views = [
-  { name: '01_arrival_ashbend', pos: { x: 2, y: sy(2, -262, 2.2), z: -262 }, yaw: Math.PI, pitch: 0.13, fov: 68, look: LOOKS.kneeling },
-  { name: '02_ashbend_deck', pos: { x: 4, y: 35.9, z: -288 }, yaw: Math.PI * 0.92, pitch: -0.02, fov: 70, look: LOOKS.kneeling },
-  { name: '03_causeway', pos: { x: 6, y: 14, z: -250 }, yaw: Math.PI, pitch: -0.08, fov: 66, look: LOOKS.kneeling },
+const sy = (x, z, e = 1.7) => {
+  // Village decks sit above the raw terrain; a camera using terrainHeight alone ends
+  // up under the platform. main.js resolves decks first — mirror that here.
+  const d = deckHeightAt(x, z);
+  const t = W.terrainHeight(x, z);
+  const g = (d !== null && d >= t - 0.6) ? d : t;
+  return g + e;
+};
+const sweep = process.env.SWEEP === '1';
+const views = sweep ? (() => {
+  const out = [];
+  const specs = [
+    { name: 'A_ashbend_vista', x: -28, z: -411, yaw: 0.30, pitch: -0.06, fov: 64, look: 'kneeling' },
+    { name: 'B_titan_close', x: 0, z: -240, yaw: Math.PI, pitch: 0.22, fov: 55, look: 'kneeling' },
+    { name: 'C_titan_side', x: -70, z: -300, yaw: 1.35, pitch: 0.18, fov: 60, look: 'kneeling' },
+    { name: 'D_causeway_up', x: 6, z: -215, yaw: Math.PI, pitch: 0.30, fov: 66, look: 'kneeling' },
+    { name: 'E_deck_stand', x: -8, z: -278, yaw: 0.9, pitch: 0.05, fov: 70, look: 'kneeling' },
+    { name: 'F_shallows_low', x: -20, z: -130, yaw: 0.2, pitch: 0.02, fov: 72, look: 'shallows' },
+    { name: 'G_kell_water', x: -60, z: -30, yaw: 1.6, pitch: 0.02, fov: 70, look: 'shallows' },
+    { name: 'H_ossuary_gate', x: 150, z: -140, yaw: -1.1, pitch: 0.08, fov: 68, look: 'ossuary' },
+    { name: 'I_glass_shards', x: -186, z: 26, yaw: 4.35, pitch: 0.02, fov: 76, look: 'glass' },
+    { name: 'J_hollow_gate', x: 10, z: 150, yaw: 0.05, pitch: 0.06, fov: 70, look: 'hollow' },
+    { name: 'K_hollow_pillars', x: -30, z: 250, yaw: 1.3, pitch: 0.05, fov: 72, look: 'hollow' },
+    { name: 'L_maw_close', x: 5, z: 246, yaw: 0.0, pitch: 0.10, fov: 68, look: 'hollow' },
+    { name: 'M_approach', x: 0, z: -330, yaw: 3.14, pitch: 0.10, fov: 70, look: 'kneeling' },
+    { name: 'N_titan_chest', x: 10, z: -270, yaw: Math.PI, pitch: 0.45, fov: 60, look: 'kneeling' },
+    { name: 'O_wide_coast', x: 60, z: -180, yaw: 2.6, pitch: 0.10, fov: 78, look: 'kneeling' },
+  ];
+  for (const sp of specs) out.push({ name: sp.name, pos: { x: sp.x, y: sy(sp.x, sp.z, 1.8), z: sp.z }, yaw: sp.yaw, pitch: sp.pitch, fov: sp.fov, look: LOOKS[sp.look] });
+  return out;
+})() : [
+  { name: '01_arrival_ashbend', pos: { x: 2, y: sy(2, -290, 1.7), z: -290 }, yaw: 0.15, pitch: -0.04, fov: 70, look: LOOKS.kneeling },
+  { name: '02_ashbend_deck', pos: { x: 6, y: sy(6, -278, 1.6), z: -278 }, yaw: Math.PI, pitch: 0.02, fov: 72, look: LOOKS.kneeling },
+  { name: '03_causeway', pos: { x: 8, y: sy(8, -256, 1.7), z: -256 }, yaw: 0.0, pitch: -0.10, fov: 68, look: LOOKS.kneeling },
   { name: '04_shallows', pos: { x: -30, y: sy(-30, -110, 3), z: -110 }, yaw: 0.5, pitch: -0.02, fov: 70, look: LOOKS.shallows },
   { name: '05_kell', pos: { x: -18, y: sy(-18, -44, 2.4), z: -44 }, yaw: 4.2, pitch: 0.0, fov: 66, look: LOOKS.shallows },
   { name: '06_ossuary', pos: { x: 130, y: sy(130, -60, 9), z: -60 }, yaw: -1.3, pitch: 0.02, fov: 70, look: LOOKS.ossuary },
@@ -464,23 +501,13 @@ const views = [
   // the Hollow is centred on (6, 268) — aim the cameras where the region actually is
   { name: '10_hollow_maw', pos: { x: 6, y: sy(6, 196, 3.0), z: 196 }, yaw: 0.0, pitch: 0.04, fov: 70, look: LOOKS.hollow },
   { name: '11_hollow_wide', pos: { x: -18, y: sy(-18, 232, 3.2), z: 232 }, yaw: 5.62, pitch: 0.02, fov: 78, look: LOOKS.hollow },
-  { name: '12_titan_vista', pos: { x: 26, y: sy(26, -196, 4), z: -196 }, yaw: Math.PI, pitch: 0.11, fov: 56, look: LOOKS.kneeling },
-];
-
+  { name: '12_titan_vista', x: 26, z: -196, yaw: Math.PI, pitch: 0.11, fov: 56, look: LOOKS.kneeling },
+].map((v) => ({ ...v, pos: v.pos || { x: v.x, y: sy(v.x, v.z, 1.8), z: v.z } }));
+// ---------------------------------------------------------------------------------------------
+// Render every view
+// ---------------------------------------------------------------------------------------------
 const t0 = Date.now();
 for (const vv of views) {
   const p = renderView(vv);
   console.log(`rendered ${p}  (${((Date.now() - t0) / 1000).toFixed(1)}s)`);
 }
-
-// ---------------------------------------------------------------------------------------------
-// Region colour check: proves each region's palette actually reaches the pixel.
-// ---------------------------------------------------------------------------------------------
-const swatch = [];
-for (const reg of W.REGIONS) {
-  const y = W.terrainHeight(reg.center.x, reg.center.z);
-  const c = aces(gameLight(hex(reg.palette.ground), { x: 0, y: 1, z: 0 }, SUN));
-  swatch.push(`${reg.id.padEnd(9)} ground=0x${reg.palette.ground.toString(16).padStart(6, '0')} -> lit rgb(${(c.r * 255).toFixed(0)}, ${(c.g * 255).toFixed(0)}, ${(c.b * 255).toFixed(0)})`);
-}
-console.log('\nregion albedo -> lit colour:');
-for (const line of swatch) console.log('  ' + line);

@@ -63,7 +63,7 @@ class Game {
 
   // ================================================================== BOOT
   async init() {
-    boot(0.02, 'Waking the coast…');
+    boot(0.02, 'Despertando a costa…');
     this.save = new SaveSystem();
     this.audio = new AudioSystem();
 
@@ -84,7 +84,7 @@ class Game {
     p.quality = q;
     this.preset = p;
 
-    boot(0.10, 'Shaping the drowned coast…');
+    boot(0.10, 'Moldando a costa afogada…');
     await frame();
 
     // ---- world
@@ -94,13 +94,13 @@ class Game {
     this.sky = new SkySystem(this.stage.scene, p);
     this.terrain = buildTerrain(p);
     this.worldGroup.add(this.terrain);
-    boot(0.26, 'Painting salt and stone…');
+    boot(0.26, 'Pintando sal e pedra…');
     await frame();
 
     this.rippleTex = generateRippleTexture();
     this.water = buildWater(p, this.rippleTex);
     this.worldGroup.add(this.water);
-    boot(0.38, 'Raising the Kneeling One…');
+    boot(0.38, 'Erguendo o Ajoelhado…');
     await frame();
 
     this.titan = buildTitan(p);
@@ -115,25 +115,25 @@ class Game {
     this.worldGroup.add(this.bellChamber);
     this.villages = buildVillages(p);
     this.worldGroup.add(this.villages);
-    boot(0.55, 'Growing the salt reeds…');
+    boot(0.55, 'Crescendo as algas de sal…');
     await frame();
 
     this.flora = new FloraSystem(this.worldGroup, p);
-    boot(0.70, 'Waking the Mutes…');
+    boot(0.70, 'Acordando os Mudos…');
     await frame();
 
     this.enemies = new EnemySystem(this.stage.scene, p);
     this.enemies.spawnAll((await import('./world/world.js')).SPAWN_ZONES);
     this.effects = new EffectsSystem(this.stage.scene, p);
     this.hymn = new HymnSystem(this.stage.scene, p);
-    boot(0.82, 'Carving the echoes…');
+    boot(0.82, 'Esculpindo os ecos…');
     await frame();
 
     // ---- collectibles (echoes, cantos, secrets, npc markers)
     this.collectibleGroup = new THREE.Group();
     this.stage.scene.add(this.collectibleGroup);
     this.buildCollectibles();
-    boot(0.90, 'Listening…');
+    boot(0.90, 'Escutando…');
     await frame();
 
     // ---- player & camera
@@ -160,7 +160,7 @@ class Game {
 
     this.applySettingsToSystems();
 
-    boot(0.97, 'Ready.');
+    boot(0.97, 'Pronto.');
     await frame();
     this.hud.hideBoot();
     this.toTitle();
@@ -391,7 +391,7 @@ class Game {
 
   loadGame(slot) {
     const data = this.save.load(slot);
-    if (!data) { this.hud.toast({ icon: '✕', title: 'Nothing to load', text: 'That thread is empty.' }); return false; }
+    if (!data) { this.hud.toast({ icon: '✕', title: 'Nada para carregar', text: 'Esse fio está vazio.' }); return false; }
     this.slot = slot;
     this.campaign = data;
     this.player.pos.set(data.player.x, data.player.y, data.player.z);
@@ -406,7 +406,7 @@ class Game {
     this.hud.setHudVisible(true);
     this.state = 'playing';
     this.audio.unlock();
-    this.hud.toast({ icon: '◈', title: 'Journey resumed', text: data.regionName || 'The coast' });
+    this.hud.toast({ icon: '◈', title: 'Jornada retomada', text: data.regionName || 'The coast' });
     return true;
   }
 
@@ -576,7 +576,7 @@ class Game {
   activateShrine(s) {
     this.audio.unlock();
     this.audio.bell(196);
-    this.hud.toast({ icon: '◇', title: s.name, text: 'Shrine lit — progress saved.' });
+    this.hud.toast({ icon: '◇', title: s.name, text: 'Santuário aceso — progresso salvo.' });
     if (!this.campaign.shrines.includes(s.id)) {
       this.campaign.shrines.push(s.id);
       this.campaign.checkpoint = { x: s.x, y: terrainHeight(s.x, s.z) + 0.5, z: s.z, yaw: this.player.facing };
@@ -588,14 +588,14 @@ class Game {
 
   activateBell(b) {
     if (this.campaign.bells.includes(b.id)) {
-      this.hud.toast({ icon: '🔔', title: b.name, text: 'This bell has already answered you.' });
+      this.hud.toast({ icon: '🔔', title: b.name, text: 'Este sino já respondeu a você.' });
       return;
     }
     this.audio.unlock();
     this.audio.bell(b.id === 'bell_hollow' ? 146.83 : b.id === 'bell_glass' ? 220 : 174.61);
     this.campaign.bells.push(b.id);
     this.cameraRig.addShake(0.22);
-    this.hud.toast({ icon: '🔔', title: b.name, text: 'The bell answers. Something far south listens.' });
+    this.hud.toast({ icon: '🔔', title: b.name, text: 'O sino responde. Algo muito ao sul escuta.' });
     this.effects.hymnBurst({ x: b.x, y: terrainHeight(b.x, b.z) + 2, z: b.z }, 16, 'ninth');
     this.campaign.checkpoint = { x: b.x, y: terrainHeight(b.x, b.z) + 0.5, z: b.z, yaw: this.player.facing };
     this.saveToSlot();
@@ -605,7 +605,7 @@ class Game {
       this.unlockAch('all_bells');
       this.campaign.flags.hollowOpen = true;
       setTimeout(() => {
-        this.hud.toast({ icon: '✦', title: 'THE HOLLOW OPENS', text: 'A door, not a mouth. Go south.' });
+        this.hud.toast({ icon: '✦', title: 'O OCO SE ABRE', text: 'Uma porta, não uma boca. Vá ao sul.' });
         this.audio.heartbeat();
       }, 2200);
     }
@@ -637,12 +637,12 @@ class Game {
     const f = this.campaign.flags;
     if (id === 'senn' && !f.talkedSenn) {
       f.talkedSenn = true;
-      this.hud.toast({ icon: '◈', title: 'Objective updated', text: 'Follow the causeway down to the Silt Shallows.' });
+      this.hud.toast({ icon: '◈', title: 'Objetivo atualizado', text: 'Siga a passagem até os Baixios de Lodo.' });
     }
     if (id === 'wren' && !f.talkedWren) {
       f.talkedWren = true;
       this.unlockAch('kell_met');
-      this.hud.toast({ icon: '⚓', title: 'Wren\'s map', text: 'The Ossuary is east. The Glass Reach is west. The Hollow is south.' });
+      this.hud.toast({ icon: '⚓', title: 'Wren\'s map', text: 'O Ossuário fica a leste. O Alcance de Vidro, a oeste. O Oco, ao sul.' });
     }
     if (id === 'tol') f.talkedTol = true;
     if (id === 'marrow') f.talkedMarrow = true;
@@ -686,7 +686,7 @@ class Game {
       if (!check || !check()) break;
       this.campaign.objectiveIndex++;
       const next = OBJECTIVES[this.campaign.objectiveIndex];
-      if (next) this.hud.toast({ icon: '◎', title: 'New objective', text: next.title });
+      if (next) this.hud.toast({ icon: '◎', title: 'Novo objetivo', text: next.title });
     }
   }
 
@@ -720,7 +720,7 @@ class Game {
     // return the player to the checkpoint with the world changed slightly
     const cp = this.campaign.checkpoint;
     if (cp) this.player.pos.set(cp.x, cp.y, cp.z);
-    this.hud.toast({ icon: '✺', title: 'The coast remains', text: 'You can keep exploring. Every echo is still out there.' });
+    this.hud.toast({ icon: '✺', title: 'A costa permanece', text: 'Você pode continuar explorando. Todo eco ainda está lá fora.' });
     this.campaign.flags.postEnding = true;
   }
 
@@ -778,7 +778,7 @@ class Game {
       case 'journal': this.hud.show('journal'); break;
       case 'map': this.hud.show('map'); this.hud.drawMap(); break;
       case 'settings': this.hud.show('settings'); break;
-      case 'save': this.saveToSlot(); this.hud.toast({ icon: '◈', title: 'Saved', text: 'This journey is stored on your device.' }); break;
+      case 'save': this.saveToSlot(); this.hud.toast({ icon: '◈', title: 'Saved', text: 'Esta jornada fica guardada no seu aparelho.' }); break;
       case 'title': this.saveToSlot(); this.toTitle(); break;
       default: break;
     }
@@ -906,10 +906,15 @@ class Game {
       this.update(dt);
       this.render(dt);
     } catch (e) {
-      console.error('Y\'SMARA runtime error:', e);
+      console.error("[Y'SMARA] era de execução:", e);
       this._errors = (this._errors || 0) + 1;
+      // Surface persistent failures instead of leaving the player with a frozen or
+      // blank view. One-off errors stay silent; three in a row means something is wrong.
       if (this._errors === 3) {
-        this.hud?.toast({ icon: '⚠', title: 'Recovered from an error', text: 'The game kept running.' });
+        this.hud?.toast({ icon: '⚠', title: 'Recuperado de um erro', text: 'O jogo continuou rodando.' });
+      }
+      if (this._errors === 12) {
+        this.showRuntimeWarning(e);
       }
     }
   };
@@ -1283,7 +1288,7 @@ class Game {
     this.audio.hurt();
     this.audio.hymnRelease('ninth');
     this.cameraRig.addShake(0.5);
-    this.hud.showCinematicText('', 'The coast listens for you. It does not hear anything yet.', 3000);
+    this.hud.showCinematicText('', 'A costa escuta por você. Ainda não ouve nada.', 3000);
     setTimeout(() => {
       // respawn at checkpoint with restored health
       const cp = this.campaign.checkpoint || { x: -4, y: terrainHeight(-4, -288), z: -288 };
@@ -1295,9 +1300,47 @@ class Game {
       this.state = 'playing';
       this.damageFlash = 0;
       this.hud.hideCinematicText();
-      this.hud.toast({ icon: '☾', title: 'You wake at the last shrine', text: 'The coast gives you another breath.' });
+      this.hud.toast({ icon: '☾', title: 'Você acorda no último santuário', text: 'A costa te dá outro fôlego.' });
       this.enemies.enemies.forEach((e) => { if (e.alive) { e.state = 'idle'; e.aggro = false; } });
     }, 2800);
+  }
+
+  /**
+   * Persistent failure: explain what happened, in Portuguese, and offer the one action
+   * that actually helps (drop to the lightest preset). Never a silent black screen.
+   */
+  showRuntimeWarning(err) {
+    if (this._warned) return;
+    this._warned = true;
+    try {
+      const box = document.getElementById('fatal');
+      const detail = document.getElementById('fatal-detail');
+      if (detail) {
+        detail.innerHTML =
+          'O jogo encontrou um problema repetido ao desenhar a cena.<br><br>' +
+          '<b>O que tentar:</b><br>' +
+          '1. Toque em <b>Qualidade mínima</b> abaixo.<br>' +
+          '2. Se continuar, feche e abra o jogo de novo.<br><br>' +
+          '<code>' + String(err && err.message ? err.message : err).slice(0, 220) + '</code>';
+        const btn = document.createElement('button');
+        btn.textContent = 'Qualidade mínima';
+        btn.className = 'btn';
+        btn.style.marginTop = '14px';
+        btn.onclick = () => {
+          try {
+            this.save.settings.quality = 'potato';
+            this.save.saveSettings?.();
+            this.applySettingsToSystems();
+            this._errors = 0;
+            this._warned = false;
+            if (box) box.style.display = 'none';
+          } catch { /* last resort */ }
+        };
+        detail.appendChild(document.createElement('br'));
+        detail.appendChild(btn);
+      }
+      if (box) box.style.display = 'block';
+    } catch { /* DOM unavailable */ }
   }
 
   // ================================================================== RENDER

@@ -31,9 +31,14 @@ function makeGL(canvas) {
     MAX_ELEMENTS_INDICES: 65536, MAX_FRAGMENT_INPUT_COMPONENTS: 120, MAX_VERTEX_OUTPUT_COMPONENTS: 120,
     FRAMEBUFFER_COMPLETE: 0x8CD5, NO_ERROR: 0, VERSION: 0x1F02, SCISSOR_BOX: 0x0C10, VIEWPORT: 0x0BA2,
   };
+  // MOBILE_STRICT=1 models a real Android WebView: no float render targets.
+  // The suite must render correctly there too — that is the bug that shipped.
+  const strict = process.env.MOBILE_STRICT === '1';
+  const noPost = process.env.MOBILE_NOPOST === '1';   // worst case: no render targets at all
   const ext = {
     WEBGL_debug_renderer_info: { UNMASKED_RENDERER_WEBGL: 0x9246, UNMASKED_VENDOR_WEBGL: 0x9245 },
-    EXT_color_buffer_float: {}, EXT_color_buffer_half_float: {}, OES_texture_float_linear: {},
+    ...(strict ? {} : { EXT_color_buffer_float: {}, EXT_color_buffer_half_float: {} }),
+    OES_texture_float_linear: {},
     EXT_texture_filter_anisotropic: { MAX_TEXTURE_MAX_ANISOTROPY_EXT: 0x84FF, TEXTURE_MAX_ANISOTROPY_EXT: 0x84FE },
     WEBGL_lose_context: { loseContext() {}, restoreContext() {} },
     OES_vertex_array_object: { createVertexArrayOES: () => ({}), bindVertexArrayOES() {}, deleteVertexArrayOES() {} },
@@ -82,7 +87,9 @@ function makeGL(canvas) {
     getActiveUniform: () => ({ name: 'u', size: 1, type: 0x1406 }),
     getActiveAttrib: () => ({ name: 'a', size: 1, type: 0x1406 }),
     getError: () => 0,
-    checkFramebufferStatus: () => 0x8CD5,
+    // When refusing render targets, report an incomplete framebuffer so three.js and
+    // the capability probe both conclude that off-screen rendering is unavailable.
+    checkFramebufferStatus: () => (process.env.MOBILE_NOPOST === '1' ? 0x8CD6 : 0x8CD5),
     isContextLost: () => false,
     getContextAttributes: () => ({ alpha: false, antialias: false, depth: true, stencil: false, premultipliedAlpha: true, preserveDrawingBuffer: false, powerPreference: 'high-performance' }),
     getUniformBlockIndex: () => 0,
@@ -236,8 +243,24 @@ if (!game) {
   await sleep(400);
 
   if (errors.length) realLog('[errors during init]', errors.slice(0,5).map(e=>String(e).slice(0,400)).join('\n---\n'));
-  if (game.stage) ok('Stage created with stubbed WebGL2', `quality=${game.qualityName}`);
-  else fail('Stage created', 'no stage');
+  if (game.stage) {
+    const caps = game.stage.caps || {};
+    ok('Stage created with stubbed WebGL2', `quality=${game.qualityName}, halfFloatRT=${caps.halfFloatRT}, usePost=${game.stage.usePost}, rtType=0x${Number(game.stage.postRTType).toString(16)}`);
+    if (process.env.MOBILE_STRICT === '1') {
+      // The regression that shipped a black screen: a WebView without half-float must
+      // never render the world into an HDR buffer it cannot back.
+      // Falling back to an 8-bit target is CORRECT and keeps the cinematic grade.
+      // The bug was using a float target that could not be backed. Assert on the format.
+      // THREE.UnsignedByteType === 1009 (0x3f1); THREE.HalfFloatType === 1016 (0x3f8)
+      if (game.stage.postRTType === 1009) ok('limited WebGL — fell back to THREE.UnsignedByteType (8-bit)');
+      else fail('limited WebGL render target', `got ${game.stage.postRTType}, expected 1009`);
+    }
+    if (process.env.MOBILE_NOPOST === '1') {
+      // Nothing renders off-screen here: drawing must go straight to the canvas.
+      if (game.stage.usePost === false) ok('no render targets — post disabled, drawing direct to canvas');
+      else fail('no render targets', 'usePost should be false when the buffer is unusable');
+    }
+  } else fail('Stage created', 'no stage');
 
   const counts = {
     terrainVerts: game.terrain?.getObjectByName('terrain_inner')?.geometry.attributes.position.count,
@@ -433,6 +456,65 @@ if (!game) {
     game.onEndingToTitle();
     ok('returns to title after ending');
   } catch (e) { fail('ending flow', e); }
+
+  // ---------- world consistency: no collectible may float or sink
+  try {
+    const surf = (x, z) => {
+      const d = game.constructor.deckHeightAt ? game.constructor.deckHeightAt(x, z) : null;
+      return game.surfaceY(x, z);
+    };
+    let bad = [];
+    const check = (kind, list) => {
+      for (const o of list) {
+        if (typeof o.y !== 'number') continue;
+        const g = game.surfaceY(o.x, o.z);
+        if (Math.abs(o.y - g) > 6) bad.push(`${kind} ${o.id}: authored y=${o.y} vs ground=${g.toFixed(1)}`);
+      }
+    };
+    check('echo', game.echoObjects.map((e) => e.data));
+    check('canto', game.cantoObjects.map((c) => c.data));
+    if (bad.length === 0) ok('world objects sit on their ground (52 checked)');
+    else fail('world object placement', bad.slice(0, 4).join('; ') + (bad.length > 4 ? ` +${bad.length - 4} more` : ''));
+  } catch (e) { fail('world placement check', e); }
+
+  // ---------- every piece of content must be reachable on foot from spawn
+  // A collectible inside a 50-degree bowl or below the waterline is content the player
+  // can see on the map and never touch. This is the difference between "it runs" and
+  // "it is playable", so it gets a hard test.
+  try {
+    const world = await import(pathToFileURL(process.cwd() + '/src/world/world.js').href);
+    const terrainHeight = world.terrainHeight;
+    const STEP = 1.5, HALF = 340, N = Math.floor((HALF * 2) / STEP);
+    const H = new Float32Array(N * N);
+    for (let i = 0; i < N; i++) for (let j = 0; j < N; j++)
+      H[i * N + j] = terrainHeight(-HALF + i * STEP, -HALF + j * STEP);
+    const seen = new Uint8Array(N * N);
+    const sx = Math.round((0 + HALF) / STEP), sz = Math.round((-288 + HALF) / STEP);
+    const q = [sx * N + sz]; seen[q[0]] = 1;
+    for (let head = 0; head < q.length; head++) {
+      const k = q[head], i = Math.floor(k / N), j = k % N;
+      for (const [di, dj] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+        const ni = i + di, nj = j + dj;
+        if (ni < 0 || nj < 0 || ni >= N || nj >= N) continue;
+        const nk = ni * N + nj;
+        if (seen[nk]) continue;
+        if (Math.abs(H[nk] - H[k]) / STEP > 0.85) continue;   // per-step climb limit
+        if (H[nk] < -0.35) continue;                          // open water
+        seen[nk] = 1; q.push(nk);
+      }
+    }
+    const reachable = (x, z) => {
+      const i = Math.round((x + HALF) / STEP), j = Math.round((z + HALF) / STEP);
+      return i >= 0 && j >= 0 && i < N && j < N && seen[i * N + j] === 1;
+    };
+    const unreachable = [];
+    for (const [kind, list] of [['echo', world.ECHOES], ['canto', world.CANTOS], ['secret', world.SECRETS],
+                                ['shrine', world.SHRINES], ['bell', world.BELLS], ['npc', world.NPCS]]) {
+      for (const o of list) if (!reachable(o.x, o.z)) unreachable.push(`${kind} ${o.id}`);
+    }
+    if (unreachable.length === 0) ok('every collectible, shrine, bell and NPC is reachable on foot from spawn');
+    else fail('content reachability', `${unreachable.length} unreachable: ${unreachable.slice(0, 5).join(', ')}`);
+  } catch (e) { fail('reachability check', e); }
 
   // ---------- regional atmosphere must actually reach the shaders
   try {

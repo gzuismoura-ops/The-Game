@@ -120,7 +120,7 @@ export class HUD {
       });
     });
     $('btn-wipe')?.addEventListener('click', () => {
-      if (confirm('Erase all saves, settings and achievements on this device? This cannot be undone.')) {
+      if (confirm('Apagar todos os saves, ajustes e conquistas deste aparelho? Isso não pode ser desfeito.')) {
         this.save.wipeAll();
         this.game.onDataWiped();
       }
@@ -195,7 +195,7 @@ export class HUD {
         });
         const mins = Math.floor(s.playTime / 60);
         d.innerHTML = `<div class="num">${s.slot}</div><div class="info">
-            <div class="region">${s.ending ? 'Journey complete — ' + (s.ending === 'rest' ? 'Let It Rest' : 'Keep the Note') : s.region}</div>
+            <div class="region">${s.ending ? 'Jornada completa — ' + (s.ending === 'rest' ? 'Deixe Descansar' : 'Guarde a Nota') : s.region}</div>
             <div class="detail">${s.echoes} echoes · ${s.cantos} cantos · ${s.bells}/3 bells · ${mins}m played</div>
           </div><div class="prog-ring">${s.ending ? '✦' : st.percent + '%'}</div>`;
       }
@@ -218,8 +218,8 @@ export class HUD {
         const row = el('div', 'slot' + (found ? '' : ' empty'));
         const name = e.title || e.name;
         row.innerHTML = `<div class="num" style="font-size:20px">${found ? '✦' : '·'}</div><div class="info">
-            <div class="region">${found ? name : 'Undiscovered'}</div>
-            <div class="detail">${found ? (e.lines ? e.lines[0] : e.text ? e.text.slice(0, 90) + '…' : (e.desc || '')) : (kind === 'echo' ? 'A memory still out there, waiting to be heard.' : 'Not yet found on the coast.')}</div>
+            <div class="region">${found ? name : 'Não descoberto'}</div>
+            <div class="detail">${found ? (e.lines ? e.lines[0] : e.text ? e.text.slice(0, 90) + '…' : (e.desc || '')) : (kind === 'echo' ? 'Uma memória ainda lá fora, esperando ser ouvida.' : 'Ainda não encontrado na costa.')}</div>
           </div>`;
         if (found) {
           row.style.cursor = 'pointer';
@@ -234,10 +234,10 @@ export class HUD {
       g.appendChild(wrap);
       body.appendChild(g);
     };
-    addGroup('Memory Echoes', save.echoes, ECHOES, 'echo');
-    addGroup('Cantos of the Choir', save.cantos, CANTOS, 'canto');
-    addGroup('The Lost Bells', save.bells, BELLS, 'bell');
-    addGroup('Secret Places', save.secrets, SECRETS, 'secret');
+    addGroup('Ecos de Memória', save.echoes, ECHOES, 'echo');
+    addGroup('Cantos do Coro', save.cantos, CANTOS, 'canto');
+    addGroup('Os Sinos Perdidos', save.bells, BELLS, 'bell');
+    addGroup('Lugares Secretos', save.secrets, SECRETS, 'secret');
     addGroup('Charms', save.charms, CHARMS.map((c) => ({ ...c, title: c.name, desc: c.desc })), 'charm');
     // achievements
     const g = el('div', 'set-group');
@@ -280,8 +280,8 @@ export class HUD {
         <div class="slots">${REGIONS.map((r) => `
           <div class="slot ${regionsVisited.includes(r.id) ? '' : 'empty'}">
             <div class="num" style="font-size:18px">${regionsVisited.includes(r.id) ? '✦' : '·'}</div>
-            <div class="info"><div class="region">${regionsVisited.includes(r.id) ? r.name : 'Unnamed Reach'}</div>
-            <div class="detail">${regionsVisited.includes(r.id) ? r.blurb : 'You have not walked here yet.'}</div></div>
+            <div class="info"><div class="region">${regionsVisited.includes(r.id) ? r.name : 'Alcance sem Nome'}</div>
+            <div class="detail">${regionsVisited.includes(r.id) ? r.blurb : 'Você ainda não andou aqui.'}</div></div>
           </div>`).join('')}</div>
       </div>
       <div class="set-group">
@@ -289,8 +289,8 @@ export class HUD {
         <div class="slots">${CHARMS.map((c) => `
           <div class="slot ${save.charms.includes(c.id) ? '' : 'empty'}">
             <div class="num" style="font-size:18px;color:#${c.color.toString(16).padStart(6, '0')}">${save.charms.includes(c.id) ? '◈' : '·'}</div>
-            <div class="info"><div class="region">${save.charms.includes(c.id) ? c.name : 'Unfound Charm'}</div>
-            <div class="detail">${save.charms.includes(c.id) ? c.desc : 'Hidden somewhere on the coast.'}</div></div>
+            <div class="info"><div class="region">${save.charms.includes(c.id) ? c.name : 'Amuleto não Encontrado'}</div>
+            <div class="detail">${save.charms.includes(c.id) ? c.desc : 'Escondido em algum lugar da costa.'}</div></div>
           </div>`).join('')}</div>
       </div>
     `;
@@ -300,19 +300,19 @@ export class HUD {
     const body = $('credits-body');
     if (!body) return;
     body.innerHTML = `
-      <h3>Y'SMARA — The Hollow Hymn</h3>
-      <p class="role">An original game, built entirely offline</p>
-      <p>Every model, texture, sound, note of music and line of story in this game is generated procedurally at runtime from code. No downloaded assets, no third-party art, no servers.</p>
-      <h3>Design & Direction</h3><p class="role">World, narrative, systems</p><p>Original concept and screenplay written for this project.</p>
-      <h3>Engine & Rendering</h3><p class="role">three.js · WebGL2 · custom shaders</p>
-      <p>Terrain splat shading, analytic water, sky dome, atmospheric grade, instanced flora with vertex wind.</p>
-      <h3>Audio</h3><p class="role">Procedural synthesis</p>
-      <p>Web Audio: additive bells, breath-noise footsteps, modal generative score in five scales.</p>
-      <h3>Story</h3>
-      <p>The Choir sang the coast into being and left the last verse unfinished. You are the Listener who decides whether a world is allowed to end.</p>
-      <h3>Thank You</h3>
-      <p>For playing something small, strange, and finished.</p>
-      <p style="margin-top:28px;color:rgba(235,227,210,.35);font-family:var(--mono);font-size:10px;letter-spacing:.2em">VERSION 1.0 · OFFLINE BUILD</p>
+      <h3>Y'SMARA — O Hino Oco</h3>
+      <p class="role">Um jogo original, feito inteiramente offline</p>
+      <p>Cada modelo, textura, som, nota musical e linha de história neste jogo é gerado proceduralmente em tempo de execução, por código. Nenhum asset baixado, nenhuma arte de terceiros, nenhum servidor.</p>
+      <h3>Design & Direção</h3><p class="role">Mundo, narrativa, sistemas</p><p>Conceito original e roteiro escritos para este projeto.</p>
+      <h3>Engine & Renderização</h3><p class="role">three.js · WebGL · shaders próprios</p>
+      <p>Terreno com splat shading, água analítica, domo de céu, correção atmosférica, vegetação instanciada com vento por vértice.</p>
+      <h3>Áudio</h3><p class="role">Síntese procedural</p>
+      <p>Web Audio: sinos aditivos, passos por ruído de fôlego, trilha modal generativa em cinco escalas.</p>
+      <h3>História</h3>
+      <p>O Coro cantou a costa até ela existir e deixou o último verso inacabado. Você é a Ouvinte que decide se um mundo tem permissão para terminar.</p>
+      <h3>Obrigado</h3>
+      <p>Por jogar algo pequeno, estranho e terminado.</p>
+      <p style="margin-top:28px;color:rgba(235,227,210,.35);font-family:var(--mono);font-size:10px;letter-spacing:.2em">VERSÃO 1.0 · BUILD OFFLINE</p>
     `;
   }
 
