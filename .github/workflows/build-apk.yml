@@ -1,8 +1,11 @@
 name: Build Android APK
 
 # Builds an installable APK from the web game using Capacitor.
-# GitHub's runners have the Android SDK pre-installed — no local setup needed.
-# Download it from the run's "Artifacts" section, or from Releases when you push a v* tag.
+# GitHub's ubuntu-latest runner ships with the Android SDK pre-installed, so
+# nothing needs to be downloaded or configured beyond setting the env vars.
+#
+# Download the APK from the run's "Artifacts" section, or from Releases when you
+# push a v* tag (this workflow attaches it automatically in that case).
 
 on:
   workflow_dispatch:
@@ -17,7 +20,7 @@ jobs:
   build-apk:
     name: Build APK
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 40
 
     steps:
       - name: Checkout
@@ -35,8 +38,18 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
+      # The Android SDK is already installed on this image. Point the build at it
+      # instead of installing it again (a third-party setup action was failing here).
+      - name: Configure Android SDK
+        run: |
+          SDK="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-/usr/local/lib/android/sdk}}"
+          echo "Using Android SDK at $SDK"
+          test -d "$SDK" || { echo "::error::Android SDK not found at $SDK"; ls -la /usr/local/lib/android 2>/dev/null; exit 1; }
+          ls "$SDK" | head
+          echo "ANDROID_SDK_ROOT=$SDK" >> "$GITHUB_ENV"
+          echo "ANDROID_HOME=$SDK" >> "$GITHUB_ENV"
+          # accept licenses for any SDK component Gradle may pull in
+          yes | "$SDK/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null 2>&1 || true
 
       - name: Install dependencies
         run: npm ci
@@ -46,15 +59,18 @@ jobs:
 
       - name: Add the Android platform
         run: |
-          npm install --no-save @capacitor/android@^8 @capacitor/cli@^8
           npx cap add android
           npx cap sync android
+          ls -la android/
 
       - name: Lock the activity to landscape
         run: |
           MANIFEST=android/app/src/main/AndroidManifest.xml
+          cat "$MANIFEST"
           sed -i 's/android:screenOrientation="[^"]*"//g' "$MANIFEST"
           sed -i 's|<activity|<activity android:screenOrientation="sensorLandscape"|' "$MANIFEST"
+          echo "--- after ---"
+          grep -n "activity" "$MANIFEST"
 
       - name: Build debug APK
         working-directory: android

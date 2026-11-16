@@ -5,3 +5,6 @@ tools/preview/
 .DS_Store
 .arena/
 yshmara-hollow-hymn.zip
+
+# Capacitor generates android/ at build time; it is not source
+android/
