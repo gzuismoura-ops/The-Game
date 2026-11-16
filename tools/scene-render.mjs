@@ -341,7 +341,7 @@ function renderView({ name, pos, yaw, pitch, fov = 66, w = 400, h = 225, look })
       }
 
       let col;
-      const fogT = (d) => 1 - Math.exp(-Math.pow(d * 0.0034 * 1.15, 1.65));
+      const fogT = (d) => 1 - Math.exp(-Math.pow(d * (look.fogDensity || 0.0034), 1.65));
 
       if (triHit) {
         const n = triHit.n;
@@ -425,13 +425,29 @@ function renderView({ name, pos, yaw, pitch, fov = 66, w = 400, h = 225, look })
   return path;
 }
 
-const LOOKS = {
-  kneeling: { zenith: hex(0x5b87a8), horizon: hex(0xcfd6d2), haze: hex(0xecdcc0), sun: hex(0xfff0d8), fog: hex(0xc9c1ae), hemi: 1.05 },
-  shallows: { zenith: hex(0x6f9ab6), horizon: hex(0xd6d9cf), haze: hex(0xf2e2c4), sun: hex(0xfff3dd), fog: hex(0xd4cab0), hemi: 1.12 },
-  ossuary: { zenith: hex(0x4a6a78), horizon: hex(0x9fb0ac), haze: hex(0xc4d8cd), sun: hex(0xe8f4e8), fog: hex(0xa8bdb4), hemi: 0.95 },
-  glass: { zenith: hex(0x7a95b0), horizon: hex(0xdfe4e2), haze: hex(0xf0eee6), sun: hex(0xfff6e6), fog: hex(0xdde2de), hemi: 1.2 },
-  hollow: { zenith: hex(0x3a4248), horizon: hex(0x6a6a66), haze: hex(0x8a8478), sun: hex(0xd8c8a8), fog: hex(0x807a70), hemi: 0.82 },
+// fog colours exactly as src/main.js regionLook() defines them
+const REGION_FOG = {
+  kneeling: { color: 0xc9c1ae, density: 0.0029, sun: 0xfff0d8 },
+  shallows: { color: 0xd4cab0, density: 0.0032, sun: 0xfff3dd },
+  ossuary:  { color: 0xa8bdb4, density: 0.0042, sun: 0xe8f4e8 },
+  glass:    { color: 0xdde2de, density: 0.0026, sun: 0xfff6e6 },
+  hollow:   { color: 0x807a70, density: 0.0052, sun: 0xd8c8a8 },
 };
+
+const LOOKS = {};
+for (const [k, v] of Object.entries(REGION_FOG)) {
+  const base = {
+    kneeling: { zenith: 0x5b87a8, horizon: 0xcfd6d2, haze: 0xecdcc0 },
+    shallows: { zenith: 0x6f9ab6, horizon: 0xd6d9cf, haze: 0xf2e2c4 },
+    ossuary:  { zenith: 0x4a6a78, horizon: 0x9fb0ac, haze: 0xc4d8cd },
+    glass:    { zenith: 0x7a95b0, horizon: 0xdfe4e2, haze: 0xf0eee6 },
+    hollow:   { zenith: 0x3a4248, horizon: 0x6a6a66, haze: 0x8a8478 },
+  }[k];
+  LOOKS[k] = {
+    zenith: hex(base.zenith), horizon: hex(base.horizon), haze: hex(base.haze),
+    sun: hex(v.sun), fog: hex(v.color), fogDensity: v.density, hemi: 1,
+  };
+}
 // hex() already yields 0-1 floats; nothing to rescale here.
 
 const sy = (x, z, e = 1.7) => W.terrainHeight(x, z) + e;

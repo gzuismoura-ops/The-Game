@@ -931,7 +931,9 @@ class Game {
       cam.updateProjectionMatrix();
       this.sky.followPlayer({ x: 0, y: 0, z: -300 }, dt, this.clock);
       this.sky.followCamera(this.stage.camera);
-      this.sky.applyLook(this.regionLook('kneeling', 0.35));
+      const titleLook = this.regionLook('kneeling', 0.35);
+      this.sky.applyLook(titleLook);
+      this.applyTerrainLook(titleLook);
       this.terrain.userData.update(this.clock);
       this.water.userData.update(this.clock);
       this.flora.update(this.clock, { x: 0, y: 0, z: -300 }, 1);
@@ -1046,7 +1048,9 @@ class Game {
     this.sky.followCamera(this.stage.camera);
     const reg = regionAt(this.player.pos.x, this.player.pos.z);
     this.currentRegion = reg;
-    this.sky.applyLook(this.regionLook(reg.id, this.hymn.charge));
+    const look = this.regionLook(reg.id, this.hymn.charge);
+    this.sky.applyLook(look);
+    this.applyTerrainLook(look);
     this.terrain.userData.update(this.clock);
     this.water.userData.update(this.clock);
     this.flora.update(this.clock, this.player.pos, 1 + this.hymn.lastLoudness * 1.6);
@@ -1094,6 +1098,28 @@ class Game {
     if (this.player.dead && this.state === 'playing') this.onPlayerDeath();
 
     this.hud.update(dt);
+  }
+
+  /**
+   * Push the active region's atmosphere into the terrain and water shaders.
+   * Without this the terrain keeps its construction-time warm haze forever and every
+   * area looks the same — the per-region palettes never reach a pixel.
+   */
+  applyTerrainLook(look) {
+    if (!this.terrain || !look) return;
+    const u = this.terrain.userData && this.terrain.userData.uniforms;
+    if (!u) return;
+    if (u.uFogColor) u.uFogColor.value.setHex(look.fogColor);
+    if (u.uFogDensity) u.uFogDensity.value = look.fogDensity;
+    if (u.uAmbient) u.uAmbient.value.setRGB(0.42, 0.50, 0.60).multiplyScalar(Math.max(0.35, look.hemiIntensity));
+    if (u.uSunColor) u.uSunColor.value.setHex(look.sunColor);
+    if (u.uSunDir && look.sunDir) u.uSunDir.value.copy(look.sunDir).normalize();
+    const wu = this.water && this.water.userData && this.water.userData.uniforms;
+    if (wu) {
+      if (wu.uFogColor) wu.uFogColor.value.setHex(look.fogColor);
+      if (wu.uFogDensity) wu.uFogDensity.value = look.fogDensity;
+      if (wu.uSunColor) wu.uSunColor.value.setHex(look.sunColor);
+    }
   }
 
   regionLook(regionId, charge = 0) {

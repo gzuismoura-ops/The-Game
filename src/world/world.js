@@ -48,7 +48,7 @@ export const REGIONS = [
     id: 'glass', name: 'The Glass Reach', short: 'Glass',
     center: { x: -206, z: -20 }, radius: 148,
     ambience: 'wind_glass', scale: 'lydian', root: 155.56, mood: 0.45,
-    palette: { ground: 0x7c848e, accent: 0xa8d6e4, fog: 0x97a6b0, sky: 0x7d99b2, water: 0x243c46 },
+    palette: { ground: 0x5e6b78, accent: 0x9fd8ea, fog: 0x8f9fae, sky: 0x6d8ba8, water: 0x1e343e },
     blurb: 'A sea that forgot how to be water. Every shard remembers a different sunset.',
   },
   {

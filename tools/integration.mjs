@@ -434,6 +434,20 @@ if (!game) {
     ok('returns to title after ending');
   } catch (e) { fail('ending flow', e); }
 
+  // ---------- regional atmosphere must actually reach the shaders
+  try {
+    game.applyTerrainLook(game.regionLook('hollow', 0));
+    const hollowFog = game.terrain.userData.uniforms.uFogColor.value.getHex();
+    const hollowDensity = game.terrain.userData.uniforms.uFogDensity.value;
+    game.applyTerrainLook(game.regionLook('glass', 0));
+    const glassFog = game.terrain.userData.uniforms.uFogColor.value.getHex();
+    if (hollowFog === 0x807a70 && hollowFog !== glassFog && hollowDensity > 0.004) {
+      ok('region fog reaches the terrain shader', `hollow=0x${hollowFog.toString(16)} glass=0x${glassFog.toString(16)}`);
+    } else {
+      fail('region fog reaches terrain shader', `hollow=0x${hollowFog.toString(16)} glass=0x${glassFog.toString(16)} d=${hollowDensity}`);
+    }
+  } catch (e) { fail('region fog uniform check', e); }
+
   // ---------- offline / no-network guarantees
   try {
     const fetches = [];

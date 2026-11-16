@@ -246,8 +246,9 @@ export class FloraSystem {
     // --- GLASS SHARDS (the Reach's signature)
     if (props.glassShard?.length) {
       const glassMat = new THREE.MeshPhysicalMaterial({
-        color: 0xd6e8ee, roughness: 0.12, metalness: 0.0, transparent: true, opacity: 0.62,
-        transmission: 0.0, side: THREE.DoubleSide, emissive: 0x2a3d44, emissiveIntensity: 0.25,
+        color: 0x93b8c6, roughness: 0.10, metalness: 0.06, transparent: true, opacity: 0.80,
+        transmission: 0.0, side: THREE.DoubleSide, emissive: 0x17414b, emissiveIntensity: 0.42,
+        clearcoat: 0.9, clearcoatRoughness: 0.08,
         flatShading: true,
       });
       const shardGeo = () => {
