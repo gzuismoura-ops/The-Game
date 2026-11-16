@@ -169,11 +169,11 @@ O jogo abre em tela cheia, travado em paisagem, e **funciona sem internet**.
 Se quiser um link público permanente (mais fácil de mandar para alguém):
 
 ```bash
-git tag v1.0.0
+git tag v1.0.1
 ```
 
 ```bash
-git push origin v1.0.0
+git push origin v1.0.1
 ```
 
 O workflow roda de novo e, ao terminar, anexa o APK automaticamente em
