@@ -906,10 +906,15 @@ class Game {
       this.update(dt);
       this.render(dt);
     } catch (e) {
-      console.error('Y\'SMARA runtime error:', e);
+      console.error("[Y'SMARA] era de execução:", e);
       this._errors = (this._errors || 0) + 1;
+      // Surface persistent failures instead of leaving the player with a frozen or
+      // blank view. One-off errors stay silent; three in a row means something is wrong.
       if (this._errors === 3) {
-        this.hud?.toast({ icon: '⚠', title: 'Recovered from an error', text: 'The game kept running.' });
+        this.hud?.toast({ icon: '⚠', title: 'Recuperado de um erro', text: 'O jogo continuou rodando.' });
+      }
+      if (this._errors === 12) {
+        this.showRuntimeWarning(e);
       }
     }
   };
@@ -1298,6 +1303,44 @@ class Game {
       this.hud.toast({ icon: '☾', title: 'You wake at the last shrine', text: 'The coast gives you another breath.' });
       this.enemies.enemies.forEach((e) => { if (e.alive) { e.state = 'idle'; e.aggro = false; } });
     }, 2800);
+  }
+
+  /**
+   * Persistent failure: explain what happened, in Portuguese, and offer the one action
+   * that actually helps (drop to the lightest preset). Never a silent black screen.
+   */
+  showRuntimeWarning(err) {
+    if (this._warned) return;
+    this._warned = true;
+    try {
+      const box = document.getElementById('fatal');
+      const detail = document.getElementById('fatal-detail');
+      if (detail) {
+        detail.innerHTML =
+          'O jogo encontrou um problema repetido ao desenhar a cena.<br><br>' +
+          '<b>O que tentar:</b><br>' +
+          '1. Toque em <b>Qualidade mínima</b> abaixo.<br>' +
+          '2. Se continuar, feche e abra o jogo de novo.<br><br>' +
+          '<code>' + String(err && err.message ? err.message : err).slice(0, 220) + '</code>';
+        const btn = document.createElement('button');
+        btn.textContent = 'Qualidade mínima';
+        btn.className = 'btn';
+        btn.style.marginTop = '14px';
+        btn.onclick = () => {
+          try {
+            this.save.settings.quality = 'potato';
+            this.save.saveSettings?.();
+            this.applySettingsToSystems();
+            this._errors = 0;
+            this._warned = false;
+            if (box) box.style.display = 'none';
+          } catch { /* last resort */ }
+        };
+        detail.appendChild(document.createElement('br'));
+        detail.appendChild(btn);
+      }
+      if (box) box.style.display = 'block';
+    } catch { /* DOM unavailable */ }
   }
 
   // ================================================================== RENDER
